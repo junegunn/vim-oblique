@@ -1,0 +1,265 @@
+# Setup
+# ==============================================================================
+
+Execute (Setup):
+  " Default should be 1
+  unlet! g:oblique#clear_highlight g:oblique#min_length g:oblique#very_magic
+  let mapleader = ' '
+
+Before:
+  set smartcase
+  set hlsearch
+
+Given:
+  Copyright (c) 2014 Junegunn Choi
+
+  MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# Basic search
+# ==============================================================================
+
+After:
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
+  doautocmd CursorMoved
+  AssertEqual 1, &hlsearch
+Do (Highlight NOT cleared when cursor is not moved):
+  /license\<cr>
+
+After:
+  AssertEqual [3, 6], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
+  doautocmd CursorMoved
+  AssertEqual 0, &hlsearch
+Do (Highlight cleared when cursor is moved):
+  /license\<cr>l
+
+After:
+  AssertEqual 0, &hlsearch
+Do (Highlight cleared when switched to insert mode):
+  /license\<cr>i\<esc>
+
+After:
+  AssertEqual [9, 16], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
+  doautocmd CursorMoved
+  AssertEqual 1, &hlsearch
+Do (Highlight is restored on n):
+  /license\<cr>ln
+
+After:
+Execute (g:oblique#clear_highlight set to 0):
+  let g:oblique#clear_highlight = 0
+  " To clear lingering autocmd
+  doautocmd CursorMoved
+
+After:
+  AssertEqual 1, &hlsearch
+Do (Highlight not cleared even when switched to insert mode):
+  /license\<cr>i\<esc>
+
+After:
+Execute (Unlet g:oblique#clear_highlight):
+  unlet g:oblique#clear_highlight
+
+After:
+  AssertEqual 8, line('.')
+  doautocmd CursorMoved
+  AssertEqual 1, &hlsearch
+Do (n and N on forward search):
+  /copy\<cr>
+  nnnN
+Do (n and N on backward search):
+  G
+  ?copy\<cr>
+  nnnN
+
+After:
+Do (/ with operator):
+  5G
+  d/dealings\<cr>
+
+Expect:
+  Copyright (c) 2014 Junegunn Choi
+
+  MIT License
+
+  DEALINGS IN THE SOFTWARE.
+
+# Search history
+# ==============================================================================
+
+After:
+  AssertEqual 'copy', histget('/', -1)
+Do (Short pattern is not added to search history):
+  /copy\<cr>
+  /co\<cr>
+
+After:
+  AssertEqual 'copy', histget('/', -2)
+  AssertEqual 'license', histget('/', -1)
+Do (Short pattern is not added to search history):
+  /copy\<cr>
+  /co\<cr>
+  /license\<cr>
+
+After:
+Execute (Set g:oblique#min_length to 2):
+  let g:oblique#min_length = 2
+
+After:
+  AssertEqual 'copy', histget('/', -3)
+  AssertEqual 'license', histget('/', -2)
+  AssertEqual 'co', histget('/', -1)
+Do (2-char pattern is then added to search history, but not 1-char pattern):
+  /co\<cr>
+  /c\<cr>
+
+After:
+Execute (Unlet g:oblique#min_length):
+  unlet g:oblique#min_length
+
+After:
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 'co', histget('/', -2)
+  AssertEqual 'license', histget('/', -1)
+Do (CTRL-P and Up to go up the history):
+  /\<C-P>\<Up>\<cr>
+
+After:
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 'license', histget('/', -1)
+Do (// will choose the last pattern):
+  //\<cr>
+
+# Very magic
+# ==============================================================================
+After:
+  AssertEqual [1, 1], [line('.'), col('.')]
+Do (/.):
+  /.\<cr>
+
+After:
+  AssertEqual [14, 63], [line('.'), col('.')]
+Do (/\V.):
+  /\V.\<cr>
+
+After:
+Execute (Set g:oblique#very_magic):
+  let g:oblique#very_magic = 1
+
+After:
+  AssertEqual [14, 63], [line('.'), col('.')]
+Do (\V is automatically prepended to .):
+  /.\<cr>
+
+After:
+  AssertEqual [1, 1], [line('.'), col('.')]
+Do (Delete prepended \V):
+  /\<c-u>.\<cr>
+
+After:
+Execute (Unlet g:oblique#very_magic):
+  unlet g:oblique#very_magic
+
+# Star-search
+# ==============================================================================
+After:
+  AssertEqual '\V\<License\>', histget('/', -1)
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
+Do (*-search):
+  jjw*
+
+After:
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
+Do (*-search and n: no more match):
+  jjw*n
+
+After:
+  AssertEqual [3, 6], [line('.'), col('.')]
+  doautocmd CursorMoved
+  AssertEqual 0, &hlsearch
+Do (*-search and move cursor to clear highlight):
+  jjw*l
+
+After:
+  AssertEqual '\Vlicense', histget('/', -1)
+  AssertEqual [9, 16], [line('.'), col('.')]
+Do (#-search in visual mode):
+  9Gfl
+  ve#
+
+After:
+  AssertEqual [3, 5], [line('.'), col('.')]
+Do (#-search in visual mode then n):
+  9Gfl
+  ve#n
+
+After:
+  AssertEqual [16, 14], [line('.'), col('.')]
+  AssertEqual '\Vlicense', histget('/', -1)
+Do (*-search, then n and N, short pattern is not added to history):
+  5Gw
+  *nnnN
+
+After:
+  AssertEqual [16, 14], [line('.'), col('.')]
+  AssertEqual '\Vlicense', histget('/', -1)
+Do (#-search, then n and N, short pattern is not added to history):
+  5Gw
+  *nnnN
+
+# Fuzzy-search
+# ==============================================================================
+
+After:
+  AssertEqual [13, 11], [line('.'), col('.')]
+  AssertEqual 'Copyright (c) 2014 Junegunn C', @a
+  AssertEqual 'copy of this software and associated doc', @b
+  AssertEqual 'copyright notice and this permission notic', @c
+Do (<Leader>/ to fuzzy-search):
+  \<Space>/ccc\<cr>
+  gn"ay
+  nnNgn"by
+  ngn"cy
+
+After:
+  AssertEqual [6, 3], [line('.'), col('.')]
+  AssertEqual 'CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN C', @a
+  AssertEqual 'copyright notice and this permission notic', @b
+  AssertEqual 'copy of this software and associated doc', @c
+Do (<Leader>? to backward-fuzzy-search):
+  G
+  \<Space>?ccc\<cr>
+  gn"ay
+  nnNgn"by
+  ngn"cy
+
+# Cleanup
+# ==============================================================================
+Before:
+After:
+Execute (Cleanup):
+  set nohlsearch
+
