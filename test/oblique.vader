@@ -151,6 +151,14 @@ After:
 Do (// will choose the last pattern):
   //\<cr>
 
+After:
+  AssertEqual [19, 51], [line('.'), col('.')]
+  AssertEqual 'copyright', histget('/', -1)
+Do (?? will choose the last pattern):
+  /copyright\<cr>
+  G
+  ??\<cr>
+
 # Very magic
 # ==============================================================================
 After:

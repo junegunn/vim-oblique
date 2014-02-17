@@ -41,10 +41,10 @@ let s:mid      = 0
 let s:backward = 0
 let s:fuzzy    = 0
 
-function! s:build_pattern(pat, fuzzy)
+function! s:build_pattern(pat, repeat, fuzzy)
   let pat = a:pat
   let prev = histget('/', -1)
-  if pat == '/' && !empty(prev)
+  if pat == a:repeat && !empty(prev)
     let pat = prev
   elseif a:fuzzy
     let chars = map(split(pat, '.\zs'), 'escape(v:val, "\\[]^$.*")')
@@ -87,7 +87,7 @@ function! g:_oblique_on_change(new, old, cursor)
   endif
 
   call s:clear_highlight()
-  let pat = s:build_pattern(a:new, s:fuzzy)
+  let pat = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   if s:search(pat)
     let prefix = pat =~# '[A-Z' ? '\C' : '\c'
     let prefix .= '\%'.line('.').'l\%'.col('.').'c'
@@ -138,15 +138,16 @@ function! s:slash(gv, backward, fuzzy)
   let vmagic  = get(g:, 'oblique#very_magic', s:DEFAULT.very_magic) ? '\V' : ''
 
   try
+    let sym = s:backward ? '?' : '/'
     let pat = pseudocl#start({
-    \ 'prompt':    ['ObliquePrompt', (s:fuzzy ? 'F' : '') . (s:backward ? '?' : '/')],
+    \ 'prompt':    ['ObliquePrompt', (s:fuzzy ? 'F' : '') . sym],
     \ 'input':     vmagic,
     \ 'history':   history,
     \ 'highlight': 'ObliqueLine',
     \ 'on_change': function('g:_oblique_on_change')
     \ })
 
-    let pat = s:build_pattern(pat, s:fuzzy)
+    let pat = s:build_pattern(pat, sym, s:fuzzy)
     if len(pat) >= get(g:, 'oblique#min_length', s:DEFAULT.min_length) + len(vmagic)
       call histadd('/', pat)
     endif
