@@ -9,6 +9,7 @@ Execute (Setup):
 Before:
   set smartcase
   set hlsearch
+  Log string(map(range(1, &history), 'histget("/", - v:val)'))
 
 Given:
   Copyright (c) 2014 Junegunn Choi
@@ -94,7 +95,7 @@ Do (n and N on backward search):
   nnnN
 
 After:
-Do (/ with operator):
+Do (/ with command):
   5G
   d/dealings\<cr>
 
@@ -112,7 +113,9 @@ After:
   AssertEqual 'copy', histget('/', -1)
 Do (Short pattern is not added to search history):
   /copy\<cr>
+  :Log string(map(range(1, &history), 'histget("/", -v:val)'))\<cr>
   /co\<cr>
+  :Log string(map(range(1, &history), 'histget("/", -v:val)'))\<cr>
 
 After:
   AssertEqual 'copy', histget('/', -2)
@@ -158,6 +161,11 @@ Do (?? will choose the last pattern):
   /copyright\<cr>
   G
   ??\<cr>
+
+After:
+  AssertEqual 'xxxnotfound', histget('/', -1)
+Do (Unmatched pattern also should be added):
+  /xxxnotfound\<cr>
 
 # Very magic
 # ==============================================================================
@@ -238,6 +246,27 @@ Do (#-search, then n and N, short pattern is not added to history):
   5Gw
   *nnnN
 
+After:
+Do (*-search around a paragraph in visual mode):
+  5Gvap*
+  dgn
+
+Expect:
+  Copyright (c) 2014 Junegunn Choi
+
+  MIT License
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 # Fuzzy-search
 # ==============================================================================
 
@@ -263,6 +292,14 @@ Do (<Leader>? to backward-fuzzy-search):
   gn"ay
   nnNgn"by
   ngn"cy
+
+# Regression
+# ==============================================================================
+
+After:
+  AssertEqual [1, 5], [line('.'), col('.')]
+Do (Invalid regular expression should not throw exception):
+  /\?\<bs>\<bs>right\<cr>
 
 # Cleanup
 # ==============================================================================

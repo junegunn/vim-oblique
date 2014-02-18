@@ -37,9 +37,10 @@ let s:DEFAULT  = {
 \ 'very_magic':      0
 \ }
 
-let s:mid      = 0
-let s:backward = 0
-let s:fuzzy    = 0
+let s:mid       = 0
+let s:backward  = 0
+let s:fuzzy     = 0
+let s:searchpos = []
 
 function! s:build_pattern(pat, repeat, fuzzy)
   let pat = a:pat
@@ -55,22 +56,44 @@ function! s:build_pattern(pat, repeat, fuzzy)
   return pat
 endfunction
 
-function! s:map_n_N(backward)
-  if a:backward
-    nnoremap <silent> N :normal! n<cr>:call <SID>set_autocmd()<cr>
-    nnoremap <silent> n :normal! N<cr>:call <SID>set_autocmd()<cr>
+function! s:search(pat)
+  keepjumps normal! ``
+  if empty(a:pat)
+    return 0
   else
-    nnoremap <silent> n :normal! n<cr>:call <SID>set_autocmd()<cr>
-    nnoremap <silent> N :normal! N<cr>:call <SID>set_autocmd()<cr>
+    let ok = 0
+    try
+      let ok = search(a:pat, 'c'. (s:backward ? 'b' : ''))
+    catch
+      let ok = 0
+    endtry
+    return ok
   endif
 endfunction
 
-function! s:search(pat)
-  keepjumps normal! ``
-  if empty(a:pat) || search(a:pat, 'c'. (s:backward ? 'b' : '')) == 0
-    return 0
+function! s:finish()
+  let last = substitute(@/, '^\\V', '', '')
+  let mlen = get(g:, 'oblique#min_length', s:DEFAULT.min_length)
+  if s:ok
+    call setpos('.', s:searchpos)
+    call winrestview(s:view)
+    call s:set_autocmd()
+    if len(last) < mlen
+      call histdel('/', -1)
+    endif
   else
-    return 1
+    if len(last) >= mlen
+      call histadd('/', @/)
+    endif
+  end
+endfunction
+
+function! s:finish_star()
+  call winrestview(s:view)
+  normal! ``
+  call s:set_autocmd()
+  if len(s:star_word) < get(g:, 'oblique#min_length', s:DEFAULT.min_length)
+    call histdel('/', -1)
   endif
 endfunction
 
@@ -125,21 +148,22 @@ function! s:on_cursor_moved(force)
   endif
 endfunction
 
-function! s:slash(gv, backward, fuzzy)
+function! s:oblique(gv, backward, fuzzy)
   let s:backward = a:backward
   let s:fuzzy = a:fuzzy
+  let s:ok = 0
 
   if a:gv
     normal! gv
   endif
-  normal! m`
 
   let history = map(reverse(range(1, &history)), 'histget("/", -v:val)')
   let vmagic  = get(g:, 'oblique#very_magic', s:DEFAULT.very_magic) ? '\V' : ''
 
+  normal! m`
   try
     let sym = s:backward ? '?' : '/'
-    let pat = pseudocl#start({
+    let input = pseudocl#start({
     \ 'prompt':    ['ObliquePrompt', (s:fuzzy ? 'F' : '') . sym],
     \ 'input':     vmagic,
     \ 'history':   history,
@@ -147,90 +171,103 @@ function! s:slash(gv, backward, fuzzy)
     \ 'on_change': function('g:_oblique_on_change')
     \ })
 
-    let pat = s:build_pattern(pat, sym, s:fuzzy)
-    if len(pat) >= get(g:, 'oblique#min_length', s:DEFAULT.min_length) + len(vmagic)
-      call histadd('/', pat)
-    endif
-
-    let @/ = pat
-    if s:search(pat)
-      call s:set_autocmd()
-      call s:map_n_N(s:backward)
+    let @/ = s:build_pattern(input, sym, s:fuzzy)
+    if s:search(@/)
+      let s:ok        = 1
+      let s:view      = winsaveview()
+      let s:searchpos = getpos('.')
+      keepjumps normal! ``
     else
       echohl Error
       call pseudocl#render#clear()
-      echon 'E486: Pattern not found: '. pat
+      echon 'E486: Pattern not found: '. @/
     endif
-    return pat
+    return @/
   catch 'exit'
     call pseudocl#render#clear()
     return @/
   finally
     call s:clear_highlight()
-    redraw
   endtry
 endfunction
 
+function! s:escape_star_pattern(pat, backward)
+  return substitute(escape(a:pat, a:backward ? '?' : '/'), "\n", '\\n', 'g')
+endfunction
+
 function! s:star_search(backward, gv)
+  let s:view = winsaveview()
+  let s:ok = 1
   if a:gv
     let xreg = @x
     normal! gv"xy
-    let word = @x
-    let pat = '\V' . @x
+    let s:star_word = @x
+    let pat = '\V' . s:escape_star_pattern(s:star_word, a:backward)
     call setreg('x', xreg, 'c')
   else
-    let word = expand('<cword>')
-    let pat = '\V\<' . word . '\>'
+    let s:star_word = expand('<cword>')
+    let pat = '\V\<' . s:escape_star_pattern(s:star_word, a:backward) . '\>'
   endif
 
   let @/ = pat
-  if len(word) >= get(g:, 'oblique#min_length', s:DEFAULT.min_length)
-    call histadd('/', pat)
-  endif
-  call s:set_autocmd()
-  call s:map_n_N(a:backward)
   return pat
 endfunction
 
-" <Plug> maps
-for fz in [0, 1]
-  for bw in [0, 1]
-    let name = (fz ? 'F' : '') . (bw ? '?' : '/')
-    execute printf('nnoremap <silent> <Plug>(Oblique-%s) :let @/ = <SID>slash(0, %d, %d)<CR>', name, bw, fz)
-    execute printf('vnoremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>slash(1, %d, %d)<CR>', name, bw, fz)
-    execute printf('onoremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>slash(0, %d, %d)<CR>', name, bw, fz)
-    unlet name
+function! s:ok()
+  return s:ok
+endfunction
+
+function! s:move(bw)
+  return "normal! ". (a:bw ? '?' : '/') . @/ . "\<CR>"
+endfunction
+
+function! s:define_maps()
+  " <Plug> maps
+  for fz in [0, 1]
+    for bw in [0, 1]
+      for m in ['n', 'o', 'v']
+        execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>oblique(%s, %d, %d)<BAR>'
+          \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>endif<BAR>call <SID>finish()<CR>',
+          \ (fz ? 'F' : '') . (bw ? '?' : '/'),
+          \ m == 'v', bw, fz, bw)
+      endfor
+    endfor
   endfor
-endfor
 
-nnoremap <silent> <Plug>(Oblique-*) :let @/ = <SID>star_search(0, 0)<cr>
-nnoremap <silent> <Plug>(Oblique-#) :let @/ = <SID>star_search(1, 0)<cr>
+  for [bw, cmd] in [[0, '*'], [1, '#']]
+    for m in ['n', 'v']
+      execute printf(m.'noremap <silent> <Plug>(Oblique-%s) m`:<c-u>let @/ = <SID>star_search(%d, %d)<BAR>'
+        \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star()<BAR>endif<CR>',
+        \ cmd, bw, m == 'v', bw)
+    endfor
+  endfor
 
-vnoremap <silent> <Plug>(Oblique-*) :<c-u>let @/ = <SID>star_search(0, 1)<cr>
-vnoremap <silent> <Plug>(Oblique-#) :<c-u>let @/ = <SID>star_search(1, 1)<cr>
+  " Setup default maps
+  for m in ['n', 'v', 'o']
+    for d in ['/', '?']
+      if !hasmapto('<Plug>(Oblique-'.d.')', m)
+        execute m.'map '.d.' <Plug>(Oblique-'.d.')'
+      endif
+      if !hasmapto('<Plug>(Oblique-F'.d.')', m)
+        execute m.'map <Leader>'.d.' <Plug>(Oblique-F'.d.')'
+      endif
+    endfor
+  endfor
 
-" Setup maps
-for m in ['n', 'v', 'o']
-  for d in ['/', '?']
-    if !hasmapto('<Plug>(Oblique-'.d.')', m)
-      execute m.'map '.d.' <Plug>(Oblique-'.d.')'
+  for m in ['n', 'v']
+    if !hasmapto('<Plug>(Oblique-*)', m)
+      execute m."map * <Plug>(Oblique-*)"
     endif
-    if !hasmapto('<Plug>(Oblique-F'.d.')', m)
-      execute m.'map <Leader>'.d.' <Plug>(Oblique-F'.d.')'
+    if !hasmapto('<Plug>(Oblique-#)', m)
+      execute m."map # <Plug>(Oblique-#)"
     endif
   endfor
-endfor
 
-for m in ['n', 'v']
-  if !hasmapto('<Plug>(Oblique-*)', m)
-    execute m."map * <Plug>(Oblique-*)"
-  endif
-  if !hasmapto('<Plug>(Oblique-#)', m)
-    execute m."map # <Plug>(Oblique-#)"
-  endif
-endfor
+  nnoremap <silent> n :normal! n<cr>:call <SID>set_autocmd()<cr>
+  nnoremap <silent> N :normal! N<cr>:call <SID>set_autocmd()<cr>
+endfunction
 
-call s:map_n_N(0)
+call s:define_maps()
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
