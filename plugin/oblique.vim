@@ -160,10 +160,13 @@ function! s:on_cursor_moved(force)
   endif
 endfunction
 
-function! s:next(n)
+function! s:next(n, gv)
   augroup Oblique
     autocmd!
   augroup END
+  if a:gv
+    normal! gv
+  endif
   execute 'normal! '.a:n
   call s:set_autocmd()
 endfunction
@@ -283,8 +286,10 @@ function! s:define_maps()
     endif
   endfor
 
-  nnoremap <silent> n :call <SID>next('n')<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
-  nnoremap <silent> N :call <SID>next('N')<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> n :call <SID>next('n', 0)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> N :call <SID>next('N', 0)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
+  vnoremap <silent> n :<c-u>call <SID>next('n', 1)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
+  vnoremap <silent> N :<c-u>call <SID>next('N', 1)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
 endfunction
 
 call s:define_maps()
