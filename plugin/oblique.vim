@@ -127,7 +127,6 @@ function! s:set_autocmd()
     return
   endif
   set hlsearch
-  redraw
   let s:pos = [line('.'), col('.')]
   augroup Oblique
     autocmd!
