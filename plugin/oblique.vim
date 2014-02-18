@@ -31,10 +31,12 @@ else
   hi def link ObliquePrompt Label
 endif
 
-let s:DEFAULT  = {
-\ 'min_length':      3,
-\ 'clear_highlight': 1,
-\ 'very_magic':      0
+let s:DEFAULT = {
+\ 'min_length':          3,
+\ 'clear_highlight':     1,
+\ 'very_magic':          0,
+\ 'enable_star_search':  1,
+\ 'enable_fuzzy_search': 1
 \ }
 
 let s:init      = 0
@@ -42,6 +44,10 @@ let s:mid       = 0
 let s:backward  = 0
 let s:fuzzy     = 0
 let s:searchpos = []
+
+function! s:optval(key)
+  return get(g:, 'oblique#'.a:key, s:DEFAULT[a:key])
+endfunction
 
 " Returns true only once
 function! s:init()
@@ -84,7 +90,7 @@ endfunction
 
 function! s:finish()
   let last = substitute(@/, '^\\V', '', '')
-  let mlen = get(g:, 'oblique#min_length', s:DEFAULT.min_length)
+  let mlen = s:optval('min_length')
   if s:ok
     call setpos('.', s:searchpos)
     call winrestview(s:view)
@@ -103,7 +109,7 @@ function! s:finish_star()
   call winrestview(s:view)
   normal! ``
   call s:set_autocmd()
-  if len(s:star_word) < get(g:, 'oblique#min_length', s:DEFAULT.min_length)
+  if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
   endif
 endfunction
@@ -131,7 +137,7 @@ function! g:_oblique_on_change(new, old, cursor)
 endfunction
 
 function! s:set_autocmd()
-  if !get(g:, 'oblique#clear_highlight', s:DEFAULT.clear_highlight)
+  if !s:optval('clear_highlight')
     augroup Oblique
       autocmd!
     augroup END
@@ -181,7 +187,7 @@ function! s:oblique(gv, backward, fuzzy)
   endif
 
   let history = map(reverse(range(1, &history)), 'histget("/", -v:val)')
-  let vmagic  = get(g:, 'oblique#very_magic', s:DEFAULT.very_magic) ? '\V' : ''
+  let vmagic  = s:optval('very_magic') ? '\V' : ''
 
   normal! m`
   try
@@ -271,20 +277,22 @@ function! s:define_maps()
       if !hasmapto('<Plug>(Oblique-'.d.')', m)
         execute m.'map '.d.' <Plug>(Oblique-'.d.')'
       endif
-      if !hasmapto('<Plug>(Oblique-F'.d.')', m)
+      if s:optval('enable_fuzzy_search') && !hasmapto('<Plug>(Oblique-F'.d.')', m)
         execute m.'map <Leader>'.d.' <Plug>(Oblique-F'.d.')'
       endif
     endfor
   endfor
 
-  for m in ['n', 'v']
-    if !hasmapto('<Plug>(Oblique-*)', m)
-      execute m."map * <Plug>(Oblique-*)"
-    endif
-    if !hasmapto('<Plug>(Oblique-#)', m)
-      execute m."map # <Plug>(Oblique-#)"
-    endif
-  endfor
+  if s:optval('enable_star_search')
+    for m in ['n', 'v']
+      if !hasmapto('<Plug>(Oblique-*)', m)
+        execute m."map * <Plug>(Oblique-*)"
+      endif
+      if !hasmapto('<Plug>(Oblique-#)', m)
+        execute m."map # <Plug>(Oblique-#)"
+      endif
+    endfor
+  endif
 
   nnoremap <silent> n :call <SID>next('n', 0)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
   nnoremap <silent> N :call <SID>next('N', 0)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
