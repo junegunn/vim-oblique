@@ -37,10 +37,21 @@ let s:DEFAULT  = {
 \ 'very_magic':      0
 \ }
 
+let s:init      = 0
 let s:mid       = 0
 let s:backward  = 0
 let s:fuzzy     = 0
 let s:searchpos = []
+
+" Returns true only once
+function! s:init()
+  if s:init
+    return 0
+  else
+    let s:init = 1
+    return 1
+  endif
+endfunction
 
 function! s:build_pattern(pat, repeat, fuzzy)
   let pat = a:pat
@@ -126,7 +137,9 @@ function! s:set_autocmd()
     augroup END
     return
   endif
-  set hlsearch
+  if !&hlsearch
+    set hlsearch
+  endif
   let s:pos = [line('.'), col('.')]
   augroup Oblique
     autocmd!
@@ -145,6 +158,14 @@ function! s:on_cursor_moved(force)
   else
     return 0
   endif
+endfunction
+
+function! s:next(n)
+  augroup Oblique
+    autocmd!
+  augroup END
+  execute 'normal! '.a:n
+  call s:set_autocmd()
 endfunction
 
 function! s:oblique(gv, backward, fuzzy)
@@ -262,8 +283,8 @@ function! s:define_maps()
     endif
   endfor
 
-  nnoremap <silent> n :normal! n<cr>:call <SID>set_autocmd()<cr>
-  nnoremap <silent> N :normal! N<cr>:call <SID>set_autocmd()<cr>
+  nnoremap <silent> n :call <SID>next('n')<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> N :call <SID>next('N')<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
 endfunction
 
 call s:define_maps()
