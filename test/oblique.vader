@@ -1,39 +1,4 @@
-# Setup
-# ==============================================================================
-
-Execute (Setup):
-  " Default should be 1
-  unlet! g:oblique#clear_highlight g:oblique#min_length g:oblique#very_magic
-  let mapleader = ' '
-
-Before:
-  set smartcase
-  set hlsearch
-  Log string(map(range(1, &history), 'histget("/", - v:val)'))
-
-Given:
-  Copyright (c) 2014 Junegunn Choi
-
-  MIT License
-
-  Permission is hereby granted, free of charge, to any person obtaining
-  a copy of this software and associated documentation files (the
-  "Software"), to deal in the Software without restriction, including
-  without limitation the rights to use, copy, modify, merge, publish,
-  distribute, sublicense, and/or sell copies of the Software, and to
-  permit persons to whom the Software is furnished to do so, subject to
-  the following conditions:
-
-  The above copyright notice and this permission notice shall be
-  included in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Include: setup.vader
 
 # Basic search
 # ==============================================================================
@@ -106,67 +71,6 @@ Expect:
 
   DEALINGS IN THE SOFTWARE.
 
-# Search history
-# ==============================================================================
-
-After:
-  AssertEqual 'copy', histget('/', -1)
-Do (Short pattern is not added to search history):
-  /copy\<cr>
-  :Log string(map(range(1, &history), 'histget("/", -v:val)'))\<cr>
-  /co\<cr>
-  :Log string(map(range(1, &history), 'histget("/", -v:val)'))\<cr>
-
-After:
-  AssertEqual 'copy', histget('/', -2)
-  AssertEqual 'license', histget('/', -1)
-Do (Short pattern is not added to search history):
-  /copy\<cr>
-  /co\<cr>
-  /license\<cr>
-
-After:
-Execute (Set g:oblique#min_length to 2):
-  let g:oblique#min_length = 2
-
-After:
-  AssertEqual 'copy', histget('/', -3)
-  AssertEqual 'license', histget('/', -2)
-  AssertEqual 'co', histget('/', -1)
-Do (2-char pattern is then added to search history, but not 1-char pattern):
-  /co\<cr>
-  /c\<cr>
-
-After:
-Execute (Unlet g:oblique#min_length):
-  unlet g:oblique#min_length
-
-After:
-  AssertEqual [3, 5], [line('.'), col('.')]
-  AssertEqual 'co', histget('/', -2)
-  AssertEqual 'license', histget('/', -1)
-Do (CTRL-P and Up to go up the history):
-  /\<C-P>\<Up>\<cr>
-
-After:
-  AssertEqual [3, 5], [line('.'), col('.')]
-  AssertEqual 'license', histget('/', -1)
-Do (// will choose the last pattern):
-  //\<cr>
-
-After:
-  AssertEqual [19, 51], [line('.'), col('.')]
-  AssertEqual 'copyright', histget('/', -1)
-Do (?? will choose the last pattern):
-  /copyright\<cr>
-  G
-  ??\<cr>
-
-After:
-  AssertEqual 'xxxnotfound', histget('/', -1)
-Do (Unmatched pattern also should be added):
-  /xxxnotfound\<cr>
-
 # Very magic
 # ==============================================================================
 After:
@@ -233,20 +137,6 @@ Do (#-search in visual mode then n):
   ve#n
 
 After:
-  AssertEqual [16, 14], [line('.'), col('.')]
-  AssertEqual '\Vlicense', histget('/', -1)
-Do (*-search, then n and N, short pattern is not added to history):
-  5Gw
-  *nnnN
-
-After:
-  AssertEqual [16, 14], [line('.'), col('.')]
-  AssertEqual '\Vlicense', histget('/', -1)
-Do (#-search, then n and N, short pattern is not added to history):
-  5Gw
-  *nnnN
-
-After:
 Do (*-search around a paragraph in visual mode):
   5Gvap*
   dgn
@@ -300,6 +190,18 @@ After:
   AssertEqual [1, 5], [line('.'), col('.')]
 Do (Invalid regular expression should not throw exception):
   /\?\<bs>\<bs>right\<cr>
+
+After:
+Execute (n should not raise error when no match is found):
+  execute "normal /xxxyyyzzz\<cr>n"
+
+After:
+Execute (N also should not raise error when no match is found):
+  execute "normal /xxxyyyzzz\<cr>N"
+
+After:
+Execute (n should not raise error in visual mode when no match is found):
+  execute "normal v/xxxyyyzzz\<cr>N"
 
 # Cleanup
 # ==============================================================================

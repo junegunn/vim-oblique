@@ -1,0 +1,82 @@
+Include: setup.vader
+
+# Search history
+# ==============================================================================
+
+After:
+  AssertEqual 'copy', histget('/', -1)
+Do (Short pattern is not added to search history):
+  /copy\<cr>
+  :Log string(map(range(1, &history), 'histget("/", -v:val)'))\<cr>
+  /co\<cr>
+  :Log string(map(range(1, &history), 'histget("/", -v:val)'))\<cr>
+
+After:
+  AssertEqual 'copy', histget('/', -2)
+  AssertEqual 'license', histget('/', -1)
+Do (Short pattern is not added to search history):
+  /copy\<cr>
+  /co\<cr>
+  /license\<cr>
+
+After:
+Execute (Set g:oblique#min_length to 2):
+  let g:oblique#min_length = 2
+
+After:
+  AssertEqual 'copy', histget('/', -3)
+  AssertEqual 'license', histget('/', -2)
+  AssertEqual 'co', histget('/', -1)
+Do (2-char pattern is then added to search history, but not 1-char pattern):
+  /co\<cr>
+  /c\<cr>
+
+After:
+Execute (Unlet g:oblique#min_length):
+  unlet g:oblique#min_length
+
+After:
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 'co', histget('/', -2)
+  AssertEqual 'license', histget('/', -1)
+Do (CTRL-P and Up to go up the history):
+  /\<C-P>\<Up>\<cr>
+
+After:
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 'license', histget('/', -1)
+Do (// will choose the last pattern):
+  //\<cr>
+
+After:
+  AssertEqual [19, 51], [line('.'), col('.')]
+  AssertEqual 'copyright', histget('/', -1)
+Do (?? will choose the last pattern):
+  /copyright\<cr>
+  G
+  ??\<cr>
+
+After:
+  AssertEqual 'xxxnotfound', histget('/', -1)
+Do (Unmatched pattern also should be added):
+  /xxxnotfound\<cr>
+
+
+# Star-search history
+# ==============================================================================
+
+After:
+  AssertEqual [16, 14], [line('.'), col('.')]
+  AssertEqual '\Vlicense', histget('/', -1)
+Do (*-search, then n and N, short pattern is not added to history):
+  5Gw
+  *nnnN
+
+After:
+  AssertEqual [16, 14], [line('.'), col('.')]
+  AssertEqual '\Vlicense', histget('/', -1)
+Do (#-search, then n and N, short pattern is not added to history):
+  5Gw
+  *nnnN
+
+

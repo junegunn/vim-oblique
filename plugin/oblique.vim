@@ -173,8 +173,14 @@ function! s:next(n, gv)
   if a:gv
     normal! gv
   endif
-  execute 'normal! '.a:n
-  call s:set_autocmd()
+  try
+    execute 'normal! '.a:n
+    call s:set_autocmd()
+  catch
+    echohl Error
+    echo substitute(v:exception, '.\{-}:', '', '')
+    echohl None
+  endtry
 endfunction
 
 function! s:oblique(gv, backward, fuzzy)
@@ -207,9 +213,10 @@ function! s:oblique(gv, backward, fuzzy)
       let s:searchpos = getpos('.')
       keepjumps normal! ``
     else
-      echohl Error
       call pseudocl#render#clear()
+      echohl Error
       echon 'E486: Pattern not found: '. @/
+      echohl None
     endif
     return @/
   catch 'exit'
