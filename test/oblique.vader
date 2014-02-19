@@ -203,6 +203,13 @@ After:
 Execute (n should not raise error in visual mode when no match is found):
   execute "normal v/xxxyyyzzz\<cr>N"
 
+After:
+Given:
+    \ { 'on': ['GHDashboard', 'GHActivity'] }
+Do (Star-search should not fail in the presence of backslashes):
+  V*
+
+
 # Cleanup
 # ==============================================================================
 Before:
