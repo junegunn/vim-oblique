@@ -107,7 +107,6 @@ endfunction
 
 function! s:finish_star()
   call winrestview(s:view)
-  normal! ``
   call s:set_autocmd()
   if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
@@ -271,7 +270,7 @@ function! s:define_maps()
 
   for [bw, cmd] in [[0, '*'], [1, '#']]
     for m in ['n', 'v']
-      execute printf(m.'noremap <silent> <Plug>(Oblique-%s) m`:<c-u>let @/ = <SID>star_search(%d, %d)<BAR>'
+      execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<c-u>let @/ = <SID>star_search(%d, %d)<BAR>'
         \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star()<BAR>endif<CR>',
         \ cmd, bw, m == 'v', bw)
     endfor
