@@ -228,7 +228,7 @@ function! s:oblique(gv, backward, fuzzy)
 endfunction
 
 function! s:escape_star_pattern(pat, backward)
-  return substitute(escape(a:pat, a:backward ? '?' : '/'), "\n", '\\n', 'g')
+  return substitute(escape(a:pat, '\' . (a:backward ? '?' : '/')), "\n", '\\n', 'g')
 endfunction
 
 function! s:star_search(backward, gv)
@@ -236,7 +236,7 @@ function! s:star_search(backward, gv)
   let s:ok = 1
   if a:gv
     let xreg = @x
-    normal! gv"xy
+    silent! normal! gv"xy
     let s:star_word = @x
     let pat = '\V' . s:escape_star_pattern(s:star_word, a:backward)
     call setreg('x', xreg, 'c')
@@ -245,7 +245,6 @@ function! s:star_search(backward, gv)
     let pat = '\V\<' . s:escape_star_pattern(s:star_word, a:backward) . '\>'
   endif
 
-  let @/ = pat
   return pat
 endfunction
 
