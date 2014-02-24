@@ -219,6 +219,7 @@ function! s:oblique(gv, backward, fuzzy)
     endif
     return @/
   catch 'exit'
+    normal! ``
     call pseudocl#render#clear()
     return @/
   finally
