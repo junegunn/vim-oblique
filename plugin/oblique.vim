@@ -235,11 +235,11 @@ function! s:star_search(backward, gv)
   let s:view = winsaveview()
   let s:ok = 1
   if a:gv
-    let xreg = @x
+    let [xreg, xregtype] = [getreg('x'), getregtype('x')]
     silent! normal! gv"xy
     let s:star_word = @x
     let pat = '\V' . s:escape_star_pattern(s:star_word, a:backward)
-    call setreg('x', xreg, 'c')
+    call setreg('x', xreg, xregtype)
   else
     let s:star_word = expand('<cword>')
     let pat = '\V\<' . s:escape_star_pattern(s:star_word, a:backward) . '\>'
