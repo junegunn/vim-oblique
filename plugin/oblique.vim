@@ -285,7 +285,7 @@ function! s:define_maps()
         execute m.'map '.d.' <Plug>(Oblique-'.d.')'
       endif
       if s:optval('enable_fuzzy_search') && !hasmapto('<Plug>(Oblique-F'.d.')', m)
-        execute m.'map <Leader>'.d.' <Plug>(Oblique-F'.d.')'
+        execute m.'map z'.d.' <Plug>(Oblique-F'.d.')'
       endif
     endfor
   endfor

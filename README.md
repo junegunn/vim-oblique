@@ -37,8 +37,8 @@ vim-oblique overrides the following keys by default:
 | ----------- | -------------------- | ------------------------------------------------ |
 | `/`         | `<Plug>(Oblique-/)`  | Forward search                                   |
 | `?`         | `<Plug>(Oblique-?)`  | Backward search                                  |
-| `<Leader>/` | `<Plug>(Oblique-F/)` | Forward fuzzy-search                             |
-| `<Leader>?` | `<Plug>(Oblique-F?)` | Backward fuzzy-search                            |
+| `z/`        | `<Plug>(Oblique-F/)` | Forward fuzzy-search                             |
+| `z?`        | `<Plug>(Oblique-F?)` | Backward fuzzy-search                            |
 | `*`         | `<Plug>(Oblique-*)`  | Forward star-search (in normal and visual mode)  |
 | `#`         | `<Plug>(Oblique-#)`  | Backward star-search (in normal and visual mode) |
 

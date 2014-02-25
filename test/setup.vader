@@ -4,7 +4,6 @@
 Execute (Setup):
   " Default should be 1
   unlet! g:oblique#clear_highlight g:oblique#min_length g:oblique#very_magic
-  let mapleader = ' '
 
 Before:
   set smartcase
