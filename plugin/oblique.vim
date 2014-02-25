@@ -74,7 +74,7 @@ function! s:build_pattern(pat, repeat, fuzzy)
 endfunction
 
 function! s:search(pat)
-  keepjumps normal! ``
+  call winrestview(s:oview)
   if empty(a:pat)
     return 0
   else
@@ -186,6 +186,7 @@ function! s:oblique(gv, backward, fuzzy)
   let s:backward = a:backward
   let s:fuzzy = a:fuzzy
   let s:ok = 0
+  let s:oview = winsaveview()
 
   if a:gv
     normal! gv
@@ -219,7 +220,7 @@ function! s:oblique(gv, backward, fuzzy)
     endif
     return @/
   catch 'exit'
-    normal! ``
+    call winrestview(s:oview)
     call pseudocl#render#clear()
     return @/
   finally
