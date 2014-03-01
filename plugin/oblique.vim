@@ -45,6 +45,7 @@ let s:backward  = 0
 let s:fuzzy     = 0
 let s:searchpos = []
 let s:offset    = ''
+let s:matching  = ''
 
 function! s:optval(key)
   return get(g:, 'oblique#'.a:key, s:DEFAULT[a:key])
@@ -214,8 +215,40 @@ function! g:_oblique_on_change(new, old, cursor)
     let prefix = pat =~# '[A-Z' ? '\C' : '\c'
     let prefix .= '\%'.line('.').'l\%'.col('.').'c'
     let s:mid = matchadd("IncSearch", prefix . pat)
+    let s:matching = pat
+  else
+    let s:matching = ''
   endif
   redraw
+endfunction
+
+function! g:_oblique_on_unknown_key(code, new, cursor)
+  if !empty(s:matching) && a:code == "\<C-L>"
+    let [a,  b]  = [getreg('a'),     getreg('b')]
+    let [at, bt] = [getregtype('a'), getregtype('b')]
+    let slash    = @/
+    try
+      let @/ = s:matching
+      normal! gn"ay
+      normal! gnl"by
+      let xtra = strpart(@b, len(@a))
+      if !empty(xtra) && xtra != "\n"
+        if xtra == (s:backward ? '?' : '/')
+          let xtra = '\'.xtra
+        elseif (&ignorecase || &smartcase) && s:matching !~# '[A-Z]'
+          let xtra = tolower(xtra)
+        endif
+        let new = strpart(a:new, 0, a:cursor) . xtra . strpart(a:new, a:cursor)
+        let cursor = a:cursor + len(xtra)
+        return [g:pseudocl#CONTINUE, new, cursor]
+      endif
+    finally
+      call setreg('a', a, at)
+      call setreg('b', b, bt)
+      let @/ = slash
+    endtry
+  endif
+  return [a:code, a:new, a:cursor]
 endfunction
 
 function! s:set_autocmd()
@@ -271,6 +304,7 @@ function! s:oblique(gv, backward, fuzzy)
   let s:ok       = 0
   let s:oview    = winsaveview()
   let s:offset   = ''
+  let s:matching = ''
 
   if a:gv
     normal! gv
@@ -282,14 +316,19 @@ function! s:oblique(gv, backward, fuzzy)
   normal! m`
   try
     let sym = s:backward ? '?' : '/'
-    let input = pseudocl#start({
+    let opts = {
     \ 'prompt':    ['ObliquePrompt', (s:fuzzy ? 'F' : '') . sym],
     \ 'input':     vmagic,
     \ 'history':   history,
     \ 'highlight': 'ObliqueLine',
     \ 'on_change': function('g:_oblique_on_change')
-    \ })
+    \ }
 
+    if !a:fuzzy
+      let opts.on_unknown_key = function('g:_oblique_on_unknown_key')
+    endif
+
+    let input = pseudocl#start(opts)
     let [@/, s:offset] = s:build_pattern(input, sym, s:fuzzy)
     if s:search(@/)
       let s:ok        = 1
