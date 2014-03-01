@@ -44,6 +44,7 @@ let s:mid       = 0
 let s:backward  = 0
 let s:fuzzy     = 0
 let s:searchpos = []
+let s:offset    = ''
 
 function! s:optval(key)
   return get(g:, 'oblique#'.a:key, s:DEFAULT[a:key])
@@ -59,6 +60,15 @@ function! s:init()
   endif
 endfunction
 
+function! s:match1(expr, pat)
+  let arr = matchlist(a:expr, a:pat)
+  if empty(arr)
+    return [0, '']
+  else
+    return [1, arr[1]]
+  endif
+endfunction
+
 function! s:build_pattern(pat, repeat, fuzzy)
   let pat = a:pat
   let prev = histget('/', -1)
@@ -70,7 +80,13 @@ function! s:build_pattern(pat, repeat, fuzzy)
       \ extend(map(chars[0 : -2], 'v:val . "[^" .v:val. "]\\{-}"'),
       \ chars[-1:-1]), '')
   endif
-  return pat
+
+  let [_, offset] = s:match1(a:pat, '\\\@<!'.a:repeat.'\([esb]\?[+-]\?[0-9]\?\)$')
+  if !empty(offset)
+    let pat = strpart(pat, 0, len(pat) - len(offset) - 1)
+  endif
+
+  return [pat, offset]
 endfunction
 
 function! s:search(pat)
@@ -88,12 +104,79 @@ function! s:search(pat)
   endif
 endfunction
 
+" :help search-offset
+function! s:apply_offset()
+  if empty(s:offset) || s:offset =~ '^[sb]$'
+    return
+  elseif s:offset == 'e'
+    execute "normal! gn\<Esc>"
+    return
+  elseif s:offset == '+'
+    normal! j0
+    return
+  elseif s:offset == '-'
+    normal! k0
+    return
+  elseif s:offset =~ '^[sb]+$'
+    normal! l
+    return
+  elseif s:offset =~ '^[sb]-$'
+    normal! h
+    return
+  elseif s:offset =~ '^e+$'
+    execute "normal! gn\<Esc>l"
+    return
+  elseif s:offset =~ '^e-$'
+    execute "normal! gn\<Esc>h"
+    return
+  endif
+
+  let [t, o] = s:match1(s:offset, '^+\?\([0-9]\+\)$')
+  if t
+    execute 'normal! '.o.'j0'
+    return
+  endif
+
+  let [t, o] = s:match1(s:offset, '^-\([0-9]\+\)$')
+  if t
+    execute 'normal! '.o.'k0'
+    return
+  endif
+
+  let [t, o] = s:match1(s:offset, '^[sb]+\?\([0-9]\+\)$')
+  if t
+    execute 'normal! '.o.'l'
+    return
+  endif
+
+  let [t, o] = s:match1(s:offset, '^[sb]-\([0-9]\+\)$')
+  if t
+    execute 'normal! '.o.'h'
+    return
+  endif
+
+  let [t, o] = s:match1(s:offset, '^e+\?\([0-9]\+\)$')
+  if t
+    execute "normal! gn\<Esc>".o.'l'
+    return
+  endif
+
+  let [t, o] = s:match1(s:offset, '^e-\([0-9]\+\)$')
+  if t
+    execute "normal! gn\<Esc>".o.'h'
+    return
+  endif
+
+  " TODO ;{pattern}  perform another search, see |//;|
+endfunction
+
 function! s:finish()
   let last = substitute(@/, '^\\V', '', '')
   let mlen = s:optval('min_length')
   if s:ok
     call setpos('.', s:searchpos)
     call winrestview(s:view)
+    call s:apply_offset()
     call s:set_autocmd()
     if len(last) < mlen
       call histdel('/', -1)
@@ -126,7 +209,7 @@ function! g:_oblique_on_change(new, old, cursor)
   endif
 
   call s:clear_highlight()
-  let pat = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
+  let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   if s:search(pat)
     let prefix = pat =~# '[A-Z' ? '\C' : '\c'
     let prefix .= '\%'.line('.').'l\%'.col('.').'c'
@@ -184,9 +267,10 @@ endfunction
 
 function! s:oblique(gv, backward, fuzzy)
   let s:backward = a:backward
-  let s:fuzzy = a:fuzzy
-  let s:ok = 0
-  let s:oview = winsaveview()
+  let s:fuzzy    = a:fuzzy
+  let s:ok       = 0
+  let s:oview    = winsaveview()
+  let s:offset   = ''
 
   if a:gv
     normal! gv
@@ -206,7 +290,7 @@ function! s:oblique(gv, backward, fuzzy)
     \ 'on_change': function('g:_oblique_on_change')
     \ })
 
-    let @/ = s:build_pattern(input, sym, s:fuzzy)
+    let [@/, s:offset] = s:build_pattern(input, sym, s:fuzzy)
     if s:search(@/)
       let s:ok        = 1
       let s:view      = winsaveview()

@@ -71,6 +71,169 @@ Expect:
 
   DEALINGS IN THE SOFTWARE.
 
+# /Offsets
+# ==============================================================================
+After:
+  AssertEqual "a", @"
+Do (/+):
+  /here/+
+  \<CR>
+  yiw
+
+After:
+  AssertEqual "without", @"
+Do (/3):
+  /here/3
+  \<CR>
+  yiw
+
+After:
+  AssertEqual "without", @"
+Do (/+3):
+  /here/+3
+  \<CR>
+  yiw
+
+After:
+  AssertEqual "\n", @"
+Do (/-):
+  /here/-
+  \<CR>
+  yy
+
+After:
+  AssertEqual "MIT", @"
+Do (/-2):
+  /here/-2
+  \<CR>
+  yiw
+
+After:
+  AssertEqual "herby", @"
+Do (/e):
+  /here/e
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "herey", @"
+Do (/e+):
+  /here/e+
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "hereb", @"
+Do (/e2):
+  /here/e2
+  \<CR>
+  xbyiw
+
+After:
+  AssertEqual "hereb", @"
+Do (/e+2):
+  /here/e+2
+  \<CR>
+  xbyiw
+
+After:
+  AssertEqual "heeby", @"
+Do (/e-):
+  /here/e-
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "hreby", @"
+Do (/e-2):
+  /here/e-2
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "ereby", @"
+Do (/s):
+  /here/s
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "ereby", @"
+Do (/b):
+  /here/b
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "hreby", @"
+Do (/s+):
+  /here/s+
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "hreby", @"
+Do (/b+):
+  /here/b+
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "heeby", @"
+Do (/s2):
+  /here/s2
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "heeby", @"
+Do (/b2):
+  /here/b2
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "heeby", @"
+Do (/s+2):
+  /here/s+2
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "heeby", @"
+Do (/b+2):
+  /here/b+2
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "ishereby", @"
+Do (/s-):
+  /here/s-
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "ishereby", @"
+Do (/b-):
+  /here/b-
+  \<CR>
+  xyiw
+
+After:
+  AssertEqual "i", @"
+Do (/s-2):
+  /here/s-2
+  \<CR>
+  xbyiw
+
+After:
+  AssertEqual "i", @"
+Do (/b-2):
+  /here/b-2
+  \<CR>
+  xbyiw
+
 # Very magic
 # ==============================================================================
 After:
