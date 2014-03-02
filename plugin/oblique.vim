@@ -82,8 +82,8 @@ function! s:build_pattern(pat, repeat, fuzzy)
       \ chars[-1:-1]), '')
   endif
 
-  let [_, offset] = s:match1(a:pat, '\\\@<!'.a:repeat.'\([esb]\?[+-]\?[0-9]\?\)$')
-  if !empty(offset)
+  let [t, offset] = s:match1(a:pat, '\\\@<!'.a:repeat.'\([esb]\?[+-]\?[0-9]\?\)$')
+  if t
     let pat = strpart(pat, 0, len(pat) - len(offset) - 1)
   endif
 
