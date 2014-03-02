@@ -211,6 +211,7 @@ function! g:_oblique_on_change(new, old, cursor)
 
   call s:clear_highlight()
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
+  let pmatching = s:matching
   if s:search(pat)
     let prefix = pat =~# '[A-Z' ? '\C' : '\c'
     let prefix .= '\%'.line('.').'l\%'.col('.').'c'
@@ -219,7 +220,9 @@ function! g:_oblique_on_change(new, old, cursor)
   else
     let s:matching = ''
   endif
-  redraw
+  if pmatching != s:matching
+    redraw
+  endif
 endfunction
 
 function! g:_oblique_on_unknown_key(code, new, cursor)
