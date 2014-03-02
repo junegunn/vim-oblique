@@ -179,6 +179,7 @@ function! s:finish()
     call winrestview(s:view)
     call s:apply_offset()
     call s:set_autocmd()
+    silent! call repeat#set("\<Plug>(Oblique-Repeat)")
     if len(last) < mlen
       call histdel('/', -1)
     endif
@@ -187,6 +188,12 @@ function! s:finish()
       call histadd('/', @/)
     endif
   end
+endfunction
+
+function! s:repeat()
+  execute printf("normal! %s%s%s\<CR>",
+    \ v:operator, s:backward ? '?' : '/', s:input)
+  silent! call repeat#set("\<Plug>(Oblique-Repeat)")
 endfunction
 
 function! s:finish_star()
@@ -337,6 +344,7 @@ function! s:oblique(gv, backward, fuzzy)
       let s:ok        = 1
       let s:view      = winsaveview()
       let s:searchpos = getpos('.')
+      let s:input     = input
       keepjumps normal! ``
     else
       call pseudocl#render#clear()
@@ -431,6 +439,8 @@ function! s:define_maps()
   nnoremap <silent> N :call <SID>next('N', 0)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
   vnoremap <silent> n :<c-u>call <SID>next('n', 1)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
   vnoremap <silent> N :<c-u>call <SID>next('N', 1)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
+
+  nnoremap <silent> <Plug>(Oblique-Repeat) :call <SID>repeat()<CR>
 endfunction
 
 call s:define_maps()
