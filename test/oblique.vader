@@ -154,9 +154,9 @@ Do (/e-):
   xyiw
 
 After:
-  AssertEqual "hreby", @"
-Do (/e-2):
-  /here/e-2
+  AssertEqual "Permision", @"
+Do (/e-12):
+  /here/e-12
   \<CR>
   xyiw
 
