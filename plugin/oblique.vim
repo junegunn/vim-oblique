@@ -171,7 +171,15 @@ function! s:apply_offset()
   " TODO ;{pattern}  perform another search, see |//;|
 endfunction
 
+function! s:revert_showcmd()
+  if exists('s:showcmd')
+    let &showcmd = s:showcmd
+    unlet! s:showcmd
+  endif
+endfunction
+
 function! s:finish()
+  call s:revert_showcmd()
   let last = substitute(@/, '^\\V', '', '')
   let mlen = s:optval('min_length')
   if s:ok
@@ -197,6 +205,7 @@ function! s:repeat()
 endfunction
 
 function! s:finish_star()
+  call s:revert_showcmd()
   call winrestview(s:view)
   call s:set_autocmd()
   if len(s:star_word) < s:optval('min_length')
@@ -384,6 +393,10 @@ function! s:star_search(backward, gv)
 endfunction
 
 function! s:ok()
+  if s:ok && &showcmd
+    let s:showcmd = 1
+    set noshowcmd
+  endif
   return s:ok
 endfunction
 
