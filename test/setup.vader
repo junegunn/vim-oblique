@@ -8,7 +8,7 @@ Execute (Setup):
 Before:
   set smartcase
   set hlsearch
-  Log string(map(range(1, &history), 'histget("/", - v:val)'))
+  " Log string(map(range(1, &history), 'histget("/", - v:val)'))
 
 Given:
   Copyright (c) 2014 Junegunn Choi

@@ -178,6 +178,12 @@ function! s:revert_showcmd()
   endif
 endfunction
 
+function! s:unfold()
+  if foldclosed('.') != -1
+    normal! zo
+  endif
+endfunction
+
 function! s:finish()
   call s:revert_showcmd()
   let last = substitute(@/, '^\\V', '', '')
@@ -186,6 +192,7 @@ function! s:finish()
     call setpos('.', s:searchpos)
     call winrestview(s:view)
     call s:apply_offset()
+    call s:unfold()
     call s:set_autocmd()
     silent! call repeat#set("\<Plug>(Oblique-Repeat)")
     if len(last) < mlen
@@ -309,6 +316,7 @@ function! s:next(n, gv)
   endif
   try
     execute 'normal! '.a:n
+    call s:unfold()
     call s:set_autocmd()
   catch
     echohl Error

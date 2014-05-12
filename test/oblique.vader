@@ -419,6 +419,33 @@ Given:
 Do (Star-search should not fail in the presence of backslashes):
   V*
 
+# (#2) Open fold on match
+Given:
+  1. a
+  2. b
+  3. a
+  4. b
+  5. a
+
+After:
+  AssertEqual -1, foldclosed('.')
+
+Do (Open fold on match (/)):
+* Fold line 2 & 3
+  jzfj
+* Go back to top
+  gg
+* / search to b
+  /b\<cr>
+
+Do (Open fold on match (* n)):
+* Fold line 2 & 3
+  jzfj
+* Go back to a at line 1
+  ggW
+* / search to the 2nd occurrence of a
+  *n
+
 
 # Cleanup
 # ==============================================================================
