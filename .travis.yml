@@ -4,6 +4,8 @@ before_script: |
   git clone https://github.com/junegunn/vader.vim.git
   git clone https://github.com/junegunn/vim-pseudocl.git
   git clone https://github.com/tpope/vim-repeat
+  sudo apt-get update -qq
+  sudo apt-get install -y vim-nox
 
 script: |
   vim -Nu <(cat << VIMRC
