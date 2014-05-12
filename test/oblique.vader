@@ -441,9 +441,9 @@ Do (Open fold on match (/)):
 Do (Open fold on match (* n)):
 * Fold line 2 & 3
   jzfj
-* Go back to a at line 1
+* Go to a at line 1
   ggW
-* / search to the 2nd occurrence of a
+* Search to the 2nd occurrence of a
   *n
 
 
