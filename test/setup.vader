@@ -6,7 +6,7 @@ Execute (Setup):
   unlet! g:oblique#clear_highlight g:oblique#min_length g:oblique#very_magic
 
 Before:
-  set smartcase
+  set smartcase ignorecase
   set hlsearch
   " Log string(map(range(1, &history), 'histget("/", - v:val)'))
 

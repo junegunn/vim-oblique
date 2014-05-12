@@ -1,0 +1,14 @@
+language: vim
+
+before_script: |
+  git clone https://github.com/junegunn/vader.vim.git
+  git clone https://github.com/junegunn/vim-pseudocl.git
+  git clone https://github.com/tpope/vim-repeat
+
+script: |
+  vim -Nu <(cat << VIMRC
+  set rtp+=vader.vim
+  set rtp+=vim-pseudocl
+  set rtp+=vim-repeat
+  set rtp+=.
+  VIMRC) -c 'Vader! test/oblique.vader' > /dev/null

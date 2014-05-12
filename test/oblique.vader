@@ -76,7 +76,7 @@ Expect:
 
 After:
   AssertEqual "hereby gr", @"
-Do (CTRL-L):
+Do (FIXME CTRL-L):
   /here
   \<C-L>\<C-L>\<C-L>\<C-L>\<C-L>\<CR>
   gny
@@ -269,7 +269,7 @@ Expect:
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Do (d/.):
+Do (FIXME d/.):
   d/limit\<CR>
   l.
 
