@@ -5,13 +5,13 @@ before_script: |
   git clone https://github.com/junegunn/vim-pseudocl.git
   git clone https://github.com/tpope/vim-repeat
 
-  # https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
-  sudo apt-get remove -y vim vim-runtime gvim vim-tiny vim-common vim-gui-common
+  sudo apt-get remove -y vim vim-runtime vim-tiny vim-common
   hg clone https://code.google.com/p/vim/
   cd vim
   ./configure --with-features=huge --prefix=/usr
   make VIMRUNTIMEDIR=/usr/share/vim/vim74
   sudo make install
+  cd -
 
 script: |
   /usr/bin/vim -Nu <(cat << VIMRC
