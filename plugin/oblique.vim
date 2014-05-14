@@ -236,7 +236,11 @@ function! g:_oblique_on_change(new, old, cursor)
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
-    let prefix = pat =~# '[A-Z' ? '\C' : '\c'
+    if !&ignorecase || (&smartcase && pat =~# '[A-Z]')
+      let prefix = '\C'
+    else
+      let prefix = '\c'
+    endif
     let prefix .= '\%'.line('.').'l\%'.col('.').'c'
     let s:mid = matchadd("IncSearch", prefix . pat)
     let s:matching = pat
