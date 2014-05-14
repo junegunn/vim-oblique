@@ -446,6 +446,20 @@ Do (Open fold on match (* n)):
 * Search to the 2nd occurrence of a
   *n
 
+After:
+
+# Error on '**'
+Given (Pattern with *s):
+  a/*/b/**/c
+
+Do (/**):
+  fb
+  /**\<cr>
+  x
+
+Expect:
+  a/*//**/c
+
 
 # Cleanup
 # ==============================================================================

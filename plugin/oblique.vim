@@ -242,7 +242,11 @@ function! g:_oblique_on_change(new, old, cursor)
       let prefix = '\c'
     endif
     let prefix .= '\%'.line('.').'l\%'.col('.').'c'
-    let s:mid = matchadd("IncSearch", prefix . pat)
+    try
+      let s:mid = matchadd("IncSearch", prefix . pat)
+    catch
+      " Ignore error
+    endtry
     let s:matching = pat
   else
     let s:matching = ''
