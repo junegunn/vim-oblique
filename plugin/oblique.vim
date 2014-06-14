@@ -24,11 +24,16 @@
 let s:cpo_save = &cpo
 set cpo&vim
 
-if hlexists('ObliqueLine')
-  hi def link ObliquePrompt ObliqueLine
-else
+if !hlexists('ObliqueLine')
   hi def link ObliqueLine None
+endif
+
+if !hlexists('ObliquePrompt')
   hi def link ObliquePrompt Label
+endif
+
+if !hlexists('ObliqueCurrentMatch')
+  hi def link ObliqueCurrentMatch IncSearch
 endif
 
 let s:DEFAULT = {
@@ -194,6 +199,7 @@ function! s:finish()
     call s:apply_offset()
     call s:unfold()
     call s:set_autocmd()
+    call s:highlight_current_match()
     silent! call repeat#set("\<Plug>(Oblique-Repeat)")
     if len(last) < mlen
       call histdel('/', -1)
@@ -215,16 +221,19 @@ function! s:finish_star()
   call s:revert_showcmd()
   call winrestview(s:view)
   call s:set_autocmd()
+  call s:highlight_current_match()
   if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
   endif
 endfunction
 
-function! s:clear_highlight()
-  if s:mid > 0
-    silent! call matchdelete(s:mid)
-    let s:mid = 0
+function! s:prefix_for(pat)
+  if !&ignorecase || (&smartcase && a:pat =~# '[A-Z]')
+    let prefix = '\C'
+  else
+    let prefix = '\c'
   endif
+  return prefix . '\%'.line('.').'l\%'.col('.').'c'
 endfunction
 
 function! g:_oblique_on_change(new, old, cursor)
@@ -236,14 +245,8 @@ function! g:_oblique_on_change(new, old, cursor)
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
-    if !&ignorecase || (&smartcase && pat =~# '[A-Z]')
-      let prefix = '\C'
-    else
-      let prefix = '\c'
-    endif
-    let prefix .= '\%'.line('.').'l\%'.col('.').'c'
     try
-      let s:mid = matchadd("IncSearch", prefix . pat)
+      let s:mid = matchadd("IncSearch", s:prefix_for(pat) . pat)
     catch
       " Ignore error
     endtry
@@ -287,9 +290,7 @@ endfunction
 
 function! s:set_autocmd()
   if !s:optval('clear_highlight')
-    augroup Oblique
-      autocmd!
-    augroup END
+    call s:clear_autocmd()
     return
   endif
   if !&hlsearch
@@ -303,27 +304,50 @@ function! s:set_autocmd()
   augroup END
 endfunction
 
+function! s:clear_highlight()
+  if s:mid > 0
+    silent! call matchdelete(s:mid)
+    let s:mid = 0
+  endif
+endfunction
+
+function! s:clear_autocmd()
+  augroup Oblique
+    autocmd!
+  augroup END
+endfunction
+
+function! s:clear()
+  call s:clear_highlight()
+  call s:clear_autocmd()
+endfunction
+
 function! s:on_cursor_moved(force)
   if a:force || line('.') != s:pos[0] || col('.') != s:pos[1]
     set nohlsearch " function-search-undo
-    augroup Oblique
-      autocmd!
-    augroup END
+    call s:clear()
     return 1
   else
     return 0
   endif
 endfunction
 
+function! s:highlight_current_match()
+  try
+    let s:mid = matchadd('ObliqueCurrentMatch', s:prefix_for(@/) . @/)
+  catch
+    " ignore error
+  endtry
+endfunction
+
 function! s:next(n, gv)
-  augroup Oblique
-    autocmd!
-  augroup END
+  call s:clear()
   if a:gv
     normal! gv
   endif
   try
     execute 'normal! '.a:n
+    call s:highlight_current_match()
     call s:unfold()
     call s:set_autocmd()
   catch
@@ -392,6 +416,8 @@ function! s:escape_star_pattern(pat, backward)
 endfunction
 
 function! s:star_search(backward, gv)
+  call s:clear_highlight()
+
   let s:view = winsaveview()
   let s:ok = 1
   if a:gv
@@ -435,7 +461,7 @@ function! s:define_maps()
 
   for [bw, cmd] in [[0, '*'], [1, '#']]
     for m in ['n', 'v']
-      execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<c-u>let @/ = <SID>star_search(%d, %d)<BAR>'
+      execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>star_search(%d, %d)<BAR>'
         \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star()<BAR>endif<CR>',
         \ cmd, bw, m == 'v', bw)
     endfor
@@ -464,10 +490,10 @@ function! s:define_maps()
     endfor
   endif
 
-  nnoremap <silent> n :call <SID>next('n', 0)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
-  nnoremap <silent> N :call <SID>next('N', 0)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
-  vnoremap <silent> n :<c-u>call <SID>next('n', 1)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
-  vnoremap <silent> N :<c-u>call <SID>next('N', 1)<BAR>if <SID>init()<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> n :call <SID>next('n', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> N :call <SID>next('N', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  vnoremap <silent> n :<c-u>call <SID>next('n', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  vnoremap <silent> N :<c-u>call <SID>next('N', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
 
   nnoremap <silent> <Plug>(Oblique-Repeat) :call <SID>repeat()<CR>
 endfunction

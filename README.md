@@ -3,6 +3,7 @@ vim-oblique
 
 Improved `/`-search for Vim.
 
+- Different highlight for the match under the cursor
 - Automatically clears search highlight when cursor is moved
 - Does not append short patterns to search history
 - Readline key bindings
@@ -68,12 +69,14 @@ Define the following highlight groups to change the color:
 
 - `ObliquePrompt` (default: linked to `Label`)
 - `ObliqueLine` (default: linked to `None`)
+- `ObliqueCurrentMatch` (default: linked to `IncSearch`)
 
 #### Example
 
 ```vim
-hi! def link ObliquePrompt Structure
-hi! def link ObliqueLine   String
+hi! def link ObliqueCurrentMatch Keyword
+hi! def link ObliquePrompt       Structure
+hi! def link ObliqueLine         String
 ```
 
 License
