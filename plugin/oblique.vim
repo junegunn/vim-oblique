@@ -246,6 +246,7 @@ function! g:_oblique_on_change(new, old, cursor)
     return
   endif
 
+  call s:clear_highlight()
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
