@@ -45,7 +45,7 @@ let s:DEFAULT = {
 \ }
 
 let s:init      = 0
-let s:mid       = 0
+let s:match_ids = {}
 let s:backward  = 0
 let s:fuzzy     = 0
 let s:searchpos = []
@@ -236,17 +236,21 @@ function! s:prefix_for(pat)
   return prefix . '\%'.line('.').'l\%'.col('.').'c'
 endfunction
 
+function! s:matchadd(...)
+  call s:clear_highlight()
+  let s:match_ids[bufnr('%')] = call('matchadd', a:000)
+endfunction
+
 function! g:_oblique_on_change(new, old, cursor)
   if getchar(1) != 0
     return
   endif
 
-  call s:clear_highlight()
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
     try
-      let s:mid = matchadd("IncSearch", s:prefix_for(pat) . pat)
+      call s:matchadd("IncSearch", s:prefix_for(pat) . pat)
     catch
       " Ignore error
     endtry
@@ -305,9 +309,9 @@ function! s:set_autocmd()
 endfunction
 
 function! s:clear_highlight()
-  if s:mid > 0
-    silent! call matchdelete(s:mid)
-    let s:mid = 0
+  let bn = bufnr('%')
+  if has_key(s:match_ids, bn)
+    silent! call matchdelete(remove(s:match_ids, bn)))
   endif
 endfunction
 
@@ -334,7 +338,7 @@ endfunction
 
 function! s:highlight_current_match()
   try
-    let s:mid = matchadd('ObliqueCurrentMatch', s:prefix_for(@/) . @/)
+    call s:matchadd('ObliqueCurrentMatch', s:prefix_for(@/) . @/)
   catch
     " ignore error
   endtry
