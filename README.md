@@ -1,4 +1,4 @@
-vim-oblique
+vim-oblique ![travis-ci](https://travis-ci.org/junegunn/vim-oblique.svg?branch=master)
 ===========
 
 Improved `/`-search for Vim.
