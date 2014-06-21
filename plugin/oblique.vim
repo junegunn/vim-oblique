@@ -51,6 +51,7 @@ let s:fuzzy     = 0
 let s:searchpos = []
 let s:offset    = ''
 let s:matching  = ''
+let s:prev      = ''
 
 function! s:optval(key)
   return get(g:, 'oblique#'.a:key, s:DEFAULT[a:key])
@@ -77,8 +78,8 @@ endfunction
 
 function! s:build_pattern(pat, repeat, fuzzy)
   let pat = a:pat
-  let prev = histget('/', -1)
-  if pat == a:repeat && !empty(prev)
+  let prev = empty(s:prev) ? histget('/', -1) : s:prev
+  if (empty(pat) || pat == a:repeat) && !empty(prev)
     let pat = prev
   elseif a:fuzzy
     let chars = map(split(pat, '.\zs'), 'escape(v:val, "\\[]^$.*")')
@@ -87,7 +88,7 @@ function! s:build_pattern(pat, repeat, fuzzy)
       \ chars[-1:-1]), '')
   endif
 
-  let [t, offset] = s:match1(a:pat, '\\\@<!'.a:repeat.'\([esb]\?[+-]\?[0-9]*\)$')
+  let [t, offset] = s:match1(pat, '\\\@<!'.a:repeat.'\([esb]\?[+-]\?[0-9]*\)$')
   if t
     let pat = strpart(pat, 0, len(pat) - len(offset) - 1)
   endif
@@ -194,6 +195,7 @@ function! s:finish()
   let last = substitute(@/, '^\\V', '', '')
   let mlen = s:optval('min_length')
   if s:ok
+    let s:prev = @/
     call setpos('.', s:searchpos)
     call winrestview(s:view)
     call s:apply_offset()
@@ -218,6 +220,7 @@ function! s:repeat()
 endfunction
 
 function! s:finish_star()
+  let s:prev = @/
   call s:revert_showcmd()
   call winrestview(s:view)
   call s:set_autocmd()

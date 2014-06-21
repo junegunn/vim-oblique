@@ -447,7 +447,6 @@ Do (Open fold on match (* n)):
   *n
 
 After:
-
 # Error on '**'
 Given (Pattern with *s):
   a/*/b/**/c
@@ -460,6 +459,65 @@ Do (/**):
 Expect:
   a/*//**/c
 
+# Empty pattern == previous pattern
+Given:
+  abc
+  abc
+  abc
+  abc
+
+  xyz
+  xyz
+  xyz
+  xyz
+
+Do (Repeat previous search with empty string):
+  /bc\<cr>
+  D
+  /\<cr>
+  D
+  //\<cr>
+  D
+  G$
+  ?yz\<cr>
+  D
+  nD
+  ?\<cr>
+  nD
+
+Expect:
+  a
+  a
+  a
+  abc
+
+  x
+  xyz
+  x
+  x
+
+Do (Should also work with star-search):
+  *
+  nnn
+  ?\<cr>
+  nnD
+
+  G#
+  nnn
+  /\<cr>
+  nnD
+
+
+Expect:
+  abc
+
+  abc
+  abc
+
+  xyz
+  xyz
+
+  xyz
 
 # Cleanup
 # ==============================================================================
