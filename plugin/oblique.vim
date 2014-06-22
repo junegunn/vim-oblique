@@ -192,7 +192,7 @@ endfunction
 
 function! s:finish()
   call s:revert_showcmd()
-  let last = substitute(@/, '^\\V', '', '')
+  let last = substitute(@/, '^\\[CZMV]', '', 'g')
   let mlen = s:optval('min_length')
   if s:ok
     let s:prev = @/
@@ -231,7 +231,8 @@ function! s:finish_star()
 endfunction
 
 function! s:prefix_for(pat)
-  if !&ignorecase || (&smartcase && a:pat =~# '[A-Z]')
+  if !&ignorecase ||
+        \ (&smartcase && substitute(a:pat, '^\\[CZMV]', '', 'g') =~# '[A-Z]')
     let prefix = '\C'
   else
     let prefix = '\c'
