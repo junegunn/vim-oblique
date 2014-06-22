@@ -519,6 +519,27 @@ Expect:
 
   xyz
 
+# \< and \> should not be used is the start/end of the pattern is not iskeyword
+Given:
+  =====
+  =====
+  =====
+
+Do (Delete the second occurrence of =====):
+  *nD
+
+Expect:
+  =====
+
+  =====
+
+# No string under cursor
+Given:
+Do (Star-search on empty line):
+  /apple\<cr>
+  *
+  :AssertEqual 'apple', @/\<cr>
+
 # Cleanup
 # ==============================================================================
 Before:

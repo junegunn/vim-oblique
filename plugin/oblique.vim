@@ -225,6 +225,8 @@ function! s:finish_star()
   call winrestview(s:view)
   call s:set_autocmd()
   call s:highlight_current_match()
+  echon "\r\r"
+  echon @/
   if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
   endif
@@ -437,7 +439,13 @@ function! s:star_search(backward, gv)
     call setreg('x', xreg, xregtype)
   else
     let s:star_word = expand('<cword>')
-    let pat = '\V\<' . s:escape_star_pattern(s:star_word, a:backward) . '\>'
+    let esc = s:escape_star_pattern(s:star_word, a:backward)
+    if empty(esc)
+      let s:ok = 0
+      echohl WarningMsg | echo 'No string under cursor' | echohl None
+      return @/
+    endif
+    let pat = (esc[0] =~ '\k') ? ('\V\<' . esc . '\>') : ('\V' . esc)
   endif
 
   return pat
