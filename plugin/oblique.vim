@@ -225,8 +225,7 @@ function! s:finish_star()
   call winrestview(s:view)
   call s:set_autocmd()
   call s:highlight_current_match()
-  echon "\r\r"
-  echon @/
+  call s:echo_pattern('n')
   if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
   endif
@@ -351,6 +350,15 @@ function! s:highlight_current_match()
   endtry
 endfunction
 
+function! s:echo_pattern(n)
+  echon "\r\r"
+  echohl ObliquePrompt
+  echon (a:n ==# 'n' ? s:backward : !s:backward) ? '?' : '/'
+  echohl ObliqueLine
+  echon @/
+  echohl None
+endfunction
+
 function! s:next(n, gv)
   call s:clear()
   if a:gv
@@ -361,6 +369,7 @@ function! s:next(n, gv)
     call s:highlight_current_match()
     call s:unfold()
     call s:set_autocmd()
+    call s:echo_pattern(a:n)
   catch
     echohl Error
     echo substitute(v:exception, '.\{-}:', '', '')
@@ -429,6 +438,7 @@ endfunction
 function! s:star_search(backward, gv)
   call s:clear_highlight()
 
+  let s:backward = a:backward
   let s:view = winsaveview()
   let s:ok = 1
   if a:gv
