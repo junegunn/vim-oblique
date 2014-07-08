@@ -44,7 +44,6 @@ let s:DEFAULT = {
 \ 'enable_fuzzy_search': 1
 \ }
 
-let s:init      = 0
 let s:match_ids = {}
 let s:backward  = 0
 let s:fuzzy     = 0
@@ -55,16 +54,6 @@ let s:prev      = ''
 
 function! s:optval(key)
   return get(g:, 'oblique#'.a:key, s:DEFAULT[a:key])
-endfunction
-
-" Returns true only once
-function! s:init()
-  if s:init
-    return 0
-  else
-    let s:init = 1
-    return 1
-  endif
 endfunction
 
 function! s:match1(expr, pat)
@@ -477,37 +466,38 @@ function! s:define_maps()
   " <Plug> maps
   for fz in [0, 1]
     for bw in [0, 1]
-      for m in ['n', 'o', 'v']
+      for m in ['n', 'o', 'x']
         execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>oblique(%s, %d, %d)<BAR>'
           \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>endif<BAR>call <SID>finish()<CR>',
           \ (fz ? 'F' : '') . (bw ? '?' : '/'),
-          \ m == 'v', bw, fz, bw)
+          \ m == 'x', bw, fz, bw)
       endfor
     endfor
   endfor
 
   for [bw, cmd] in [[0, '*'], [1, '#']]
-    for m in ['n', 'v']
+    for m in ['n', 'x']
       execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>star_search(%d, %d)<BAR>'
         \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star()<BAR>endif<CR>',
-        \ cmd, bw, m == 'v', bw)
+        \ cmd, bw, m == 'x', bw)
     endfor
   endfor
 
   " Setup default maps
-  for m in ['n', 'v', 'o']
+  let enable_fuzzy_search = s:optval('enable_fuzzy_search')
+  for m in ['n', 'x', 'o']
     for d in ['/', '?']
       if !hasmapto('<Plug>(Oblique-'.d.')', m)
         execute m.'map '.d.' <Plug>(Oblique-'.d.')'
       endif
-      if s:optval('enable_fuzzy_search') && !hasmapto('<Plug>(Oblique-F'.d.')', m)
+      if enable_fuzzy_search && !hasmapto('<Plug>(Oblique-F'.d.')', m)
         execute m.'map z'.d.' <Plug>(Oblique-F'.d.')'
       endif
     endfor
   endfor
 
   if s:optval('enable_star_search')
-    for m in ['n', 'v']
+    for m in ['n', 'x']
       if !hasmapto('<Plug>(Oblique-*)', m)
         execute m."map * <Plug>(Oblique-*)"
       endif
@@ -519,8 +509,8 @@ function! s:define_maps()
 
   nnoremap <silent> n :call <SID>next('n', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
   nnoremap <silent> N :call <SID>next('N', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
-  vnoremap <silent> n :<c-u>call <SID>next('n', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
-  vnoremap <silent> N :<c-u>call <SID>next('N', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  xnoremap <silent> n :<c-u>call <SID>next('n', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  xnoremap <silent> N :<c-u>call <SID>next('N', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
 
   nnoremap <silent> <Plug>(Oblique-Repeat) :call <SID>repeat()<CR>
 endfunction
