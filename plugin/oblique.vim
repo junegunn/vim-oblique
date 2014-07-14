@@ -296,7 +296,7 @@ function! s:set_autocmd()
     set hlsearch
   endif
   let s:pos = [line('.'), col('.')]
-  augroup Oblique
+  execute 'augroup Oblique'.bufnr('%')
     autocmd!
     autocmd CursorMoved <buffer> call s:on_cursor_moved(0)
     autocmd InsertEnter <buffer> call s:on_cursor_moved(1)
@@ -311,9 +311,10 @@ function! s:clear_highlight()
 endfunction
 
 function! s:clear_autocmd()
-  augroup Oblique
+  execute 'augroup Oblique'.bufnr('%')
     autocmd!
   augroup END
+  execute 'augroup! Oblique'.bufnr('%')
 endfunction
 
 function! s:clear()
