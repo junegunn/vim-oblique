@@ -295,18 +295,42 @@ function! s:set_autocmd()
   if !&hlsearch
     set hlsearch
   endif
-  let s:pos = [line('.'), col('.')]
+  let b:_oblique_pos = [line('.'), col('.')]
   execute 'augroup Oblique'.bufnr('%')
     autocmd!
     autocmd CursorMoved <buffer> call s:on_cursor_moved(0)
     autocmd InsertEnter <buffer> call s:on_cursor_moved(1)
+    autocmd WinLeave    <buffer> call s:on_win_leave(expand('<abuf>'))
   augroup END
 endfunction
 
-function! s:clear_highlight()
-  let bn = bufnr('%')
+function! s:on_win_leave(buf)
+  call s:clear_highlight(a:buf)
+  augroup ObliqueExtra
+    autocmd!
+    autocmd CursorMoved * call s:on_win_enter()
+  augroup END
+endfunction
+
+function! s:on_win_enter()
+  augroup ObliqueExtra
+    autocmd!
+    autocmd CursorMoved * if exists('b:_oblique_pos')
+                       \|   call s:on_cursor_moved(0)
+                       \| else
+                       \|   set nohlsearch
+                       \| endif
+                       \| augroup ObliqueExtra
+                       \|   execute 'autocmd!'
+                       \| augroup END
+                       \| augroup! ObliqueExtra
+  augroup END
+endfunction
+
+function! s:clear_highlight(...)
+  let bn = a:0 > 0 ? a:1 : bufnr('%')
   if has_key(s:match_ids, bn)
-    silent! call matchdelete(remove(s:match_ids, bn)))
+    silent! call matchdelete(remove(s:match_ids, bn))
   endif
 endfunction
 
@@ -323,7 +347,7 @@ function! s:clear()
 endfunction
 
 function! s:on_cursor_moved(force)
-  if a:force || line('.') != s:pos[0] || col('.') != s:pos[1]
+  if a:force || !exists('b:_oblique_pos') || line('.') != b:_oblique_pos[0] || col('.') != b:_oblique_pos[1]
     set nohlsearch " function-search-undo
     call s:clear()
     return 1
