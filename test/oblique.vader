@@ -367,6 +367,24 @@ Expect:
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# gStar-search
+# ==============================================================================
+After:
+  AssertEqual '\Vcopy', histget('/', -1)
+  AssertEqual [1, 1], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
+Do (g*-search):
+  6G
+  wg*N
+
+After:
+  AssertEqual '\Vcopy', histget('/', -1)
+  AssertEqual [1, 1], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
+Do (g#-search):
+  6G
+  wg#n
+
 # Fuzzy-search
 # ==============================================================================
 

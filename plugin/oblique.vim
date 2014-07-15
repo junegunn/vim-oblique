@@ -449,7 +449,7 @@ function! s:escape_star_pattern(pat, backward)
   return substitute(escape(a:pat, '\' . (a:backward ? '?' : '/')), "\n", '\\n', 'g')
 endfunction
 
-function! s:star_search(backward, gv)
+function! s:star_search(backward, word, gv)
   call s:clear_highlight()
 
   let s:backward = a:backward
@@ -469,7 +469,7 @@ function! s:star_search(backward, gv)
       echohl WarningMsg | echo 'No string under cursor' | echohl None
       return @/
     endif
-    let pat = (esc[0] =~ '\k') ? ('\V\<' . esc . '\>') : ('\V' . esc)
+    let pat = (esc[0] =~ '\k' && a:word) ? ('\V\<' . esc . '\>') : ('\V' . esc)
   endif
 
   return pat
@@ -500,11 +500,12 @@ function! s:define_maps()
     endfor
   endfor
 
-  for [bw, cmd] in [[0, '*'], [1, '#']]
+  for [bw, w, cmd] in [[0, 1, '*'], [1, 1, '#'], [0, 0, 'g*'], [1, 0, 'g#']]
     for m in ['n', 'x']
-      execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>star_search(%d, %d)<BAR>'
+      if !w && m == 'x' | continue | endif
+      execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>star_search(%d, %d, %d)<BAR>'
         \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star()<BAR>endif<CR>',
-        \ cmd, bw, m == 'x', bw)
+        \ cmd, bw, w, m == 'x', bw)
     endfor
   endfor
 
@@ -530,6 +531,12 @@ function! s:define_maps()
         execute m."map # <Plug>(Oblique-#)"
       endif
     endfor
+    if !hasmapto('<Plug>(Oblique-g*)', 'n')
+      execute "nmap g* <Plug>(Oblique-g*)"
+    endif
+    if !hasmapto('<Plug>(Oblique-g#)', 'n')
+      execute "nmap g# <Plug>(Oblique-g#)"
+    endif
   endif
 
   nnoremap <silent> n :call <SID>next('n', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>

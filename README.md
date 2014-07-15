@@ -42,6 +42,8 @@ vim-oblique overrides the following keys by default:
 | `z?`        | `<Plug>(Oblique-F?)` | Backward fuzzy-search                            |
 | `*`         | `<Plug>(Oblique-*)`  | Forward star-search (in normal and visual mode)  |
 | `#`         | `<Plug>(Oblique-#)`  | Backward star-search (in normal and visual mode) |
+| `g*`        | `<Plug>(Oblique-g*)` | Forward star-search (no word boundary match)     |
+| `g#`        | `<Plug>(Oblique-g#)` | Backward star-search (no word boundary match)    |
 
 (Unlike the default star-search, the overridden version will not move the cursor)
 
