@@ -488,6 +488,12 @@ function! s:move(bw)
 endfunction
 
 function! s:define_maps()
+  silent! call pseudocl#nop()
+  if !exists('*pseudocl#start')
+    echoerr 'junegunn/vim-pseudocl not found'
+    return
+  endif
+
   " <Plug> maps
   for fz in [0, 1]
     for bw in [0, 1]

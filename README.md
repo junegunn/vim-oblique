@@ -19,14 +19,8 @@ Use your favorite plugin manager. vim-oblique requires
 With [vim-plug](https://github.com/junegunn/vim-plug):
 
 ```vim
+Plug 'junegunn/vim-pseudocl'
 Plug 'junegunn/vim-oblique'
-```
-
-Or with [Vundle](https://github.com/gmarik/vundle):
-
-```vim
-Bundle 'junegunn/vim-pseudocl'
-Bundle 'junegunn/vim-oblique'
 ```
 
 Usage
