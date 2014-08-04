@@ -367,9 +367,16 @@ endfunction
 function! s:echo_pattern(n)
   echon "\r\r"
   echohl ObliquePrompt
-  echon (a:n ==# 'n' ? s:backward : !s:backward) ? '?' : '/'
-  echohl ObliqueLine
-  echon @/
+  let bw = (a:n ==# 'n' ? s:backward : !s:backward)
+  if s:fuzzy
+    echon bw ? 'F?' : 'F/'
+    echohl ObliqueLine
+    echon s:input
+  else
+    echon bw ? '?' : '/'
+    echohl ObliqueLine
+    echon @/
+  endif
   echohl None
 endfunction
 
