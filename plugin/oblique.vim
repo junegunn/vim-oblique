@@ -400,6 +400,7 @@ endfunction
 
 function! s:oblique(gv, backward, fuzzy)
   let s:backward = a:backward
+  let was_fuzzy  = s:fuzzy
   let s:fuzzy    = a:fuzzy
   let s:ok       = 0
   let s:oview    = winsaveview()
@@ -446,6 +447,7 @@ function! s:oblique(gv, backward, fuzzy)
   catch 'exit'
     call winrestview(s:oview)
     call pseudocl#render#clear()
+    let s:fuzzy = was_fuzzy
     return @/
   finally
     call s:clear_highlight()
