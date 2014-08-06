@@ -558,6 +558,27 @@ Do (Star-search on empty line):
   *
   :AssertEqual 'apple', @/\<cr>
 
+Given:
+  1apple
+  2apple
+  3apple
+  4apple
+  5apple
+  6apple
+
+Do (Counted n/N):
+  /apple\<cr>
+  3nD
+  2NCbanana
+
+Expect:
+  1apple
+  2banana
+  3apple
+  4
+  5apple
+  6apple
+
 # Cleanup
 # ==============================================================================
 Before:
