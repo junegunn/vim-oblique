@@ -380,6 +380,10 @@ function! s:echo_pattern(n)
   echohl None
 endfunction
 
+function! s:e486_fuzzy()
+  return 'E486: Fuzzy pattern not found: '. s:input
+endfunction
+
 function! s:next(n, gv)
   call s:clear()
   if a:gv
@@ -392,8 +396,13 @@ function! s:next(n, gv)
     call s:set_autocmd()
     call s:echo_pattern(a:n)
   catch
+    let msg = substitute(v:exception, '.\{-}:', '', '')
     echohl Error
-    echo substitute(v:exception, '.\{-}:', '', '')
+    if s:fuzzy && msg =~ '^E486'
+      echo s:e486_fuzzy()
+    else
+      echo msg
+    endif
     echohl None
   endtry
 endfunction
@@ -429,18 +438,21 @@ function! s:oblique(gv, backward, fuzzy)
       let opts.on_unknown_key = function('g:_oblique_on_unknown_key')
     endif
 
-    let input = pseudocl#start(opts)
-    let [@/, s:offset] = s:build_pattern(input, sym, s:fuzzy)
+    let s:input = pseudocl#start(opts)
+    let [@/, s:offset] = s:build_pattern(s:input, sym, s:fuzzy)
     if s:search(@/)
       let s:ok        = 1
       let s:view      = winsaveview()
       let s:searchpos = getpos('.')
-      let s:input     = input
       keepjumps normal! ``
     else
       call pseudocl#render#clear()
       echohl Error
-      echon 'E486: Pattern not found: '. @/
+      if s:fuzzy
+        echon s:e486_fuzzy()
+      else
+        echon 'E486: Pattern not found: '. @/
+      endif
       echohl None
     endif
     return @/
