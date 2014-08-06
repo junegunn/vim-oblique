@@ -566,10 +566,18 @@ function! s:define_maps()
     endif
   endif
 
-  nnoremap <silent> n :call <SID>next('n', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
-  nnoremap <silent> N :call <SID>next('N', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
-  xnoremap <silent> n :<c-u>call <SID>next('n', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
-  xnoremap <silent> N :<c-u>call <SID>next('N', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> <Plug>(Oblique-n) :call <SID>next('n', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> <Plug>(Oblique-N) :call <SID>next('N', 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  xnoremap <silent> <Plug>(Oblique-n) :<c-u>call <SID>next('n', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  xnoremap <silent> <Plug>(Oblique-N) :<c-u>call <SID>next('N', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  for m in ['n', 'x']
+    if !hasmapto('<Plug>(Oblique-n)', m)
+      execute m."map n <Plug>(Oblique-n)"
+    endif
+    if !hasmapto('<Plug>(Oblique-N)', m)
+      execute m."map N <Plug>(Oblique-N)"
+    endif
+  endfor
 
   nnoremap <silent> <Plug>(Oblique-Repeat) :call <SID>repeat()<CR>
 endfunction
