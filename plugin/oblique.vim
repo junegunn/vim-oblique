@@ -430,12 +430,13 @@ function! s:oblique(gv, backward, fuzzy)
     \ 'prompt':    ['ObliquePrompt', (s:fuzzy ? 'F' : '') . sym],
     \ 'input':     vmagic,
     \ 'history':   history,
-    \ 'highlight': 'ObliqueLine',
-    \ 'on_change': function('g:_oblique_on_change')
+    \ 'highlight': 'ObliqueLine'
     \ }
-
-    if !a:fuzzy
-      let opts.on_unknown_key = function('g:_oblique_on_unknown_key')
+    if &incsearch
+      let opts.on_change = function('g:_oblique_on_change')
+      if !a:fuzzy
+        let opts.on_unknown_key = function('g:_oblique_on_unknown_key')
+      endif
     endif
 
     let s:input = pseudocl#start(opts)
