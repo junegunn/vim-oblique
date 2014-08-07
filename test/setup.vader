@@ -5,6 +5,10 @@ Execute (Setup):
   " Default should be 1
   unlet! g:oblique#clear_highlight g:oblique#min_length g:oblique#very_magic
 
+  autocmd! User Oblique
+  autocmd! User ObliqueStar
+  autocmd! User ObliqueRepeat
+
 Before:
   set smartcase ignorecase
   set hlsearch

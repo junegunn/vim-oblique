@@ -195,6 +195,7 @@ function! s:finish()
     if len(last) < mlen
       call histdel('/', -1)
     endif
+    silent! doautocmd User Oblique
   else
     if len(last) >= mlen
       call histadd('/', @/)
@@ -218,6 +219,7 @@ function! s:finish_star()
   if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
   endif
+  silent! doautocmd User ObliqueStar
 endfunction
 
 function! s:prefix_for(pat)
@@ -395,6 +397,7 @@ function! s:next(n, cnt, gv)
     call s:unfold()
     call s:set_autocmd()
     call s:echo_pattern(a:n)
+    silent! doautocmd User ObliqueRepeat
   catch
     let msg = substitute(v:exception, '.\{-}:', '', '')
     echohl Error

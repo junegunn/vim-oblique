@@ -61,6 +61,31 @@ Use the <Plug> maps in the above table to customize the maps.
 - `g:oblique#enable_star_search` (default: 1)
 - `g:oblique#enable_fuzzy_search` (default: 1)
 
+### Events
+
+You can customize the behavior of vim-oblique by registering custom actions to
+the following events of `User` group.
+
+| Event           | When                 |
+| --------------- | -------------------- |
+| `Oblique`       | `/`, `?`, `z/`, `z?` |
+| `ObliqueStar`   | `*`, `#`, `g*`, `g#` |
+| `ObliqueRepeat` | `n`, `N`             |
+
+The following example will move your cursor line to the middle of the screen
+after search.
+
+```vim
+" Clear autocommand
+autocmd! User Oblique
+autocmd! User ObliqueStar
+autocmd! User ObliqueRepeat
+
+autocmd User Oblique       normal! zz
+autocmd User ObliqueStar   normal! zz
+autocmd User ObliqueRepeat normal! zz
+```
+
 ### Highlighting
 
 Define the following highlight groups to change the color:

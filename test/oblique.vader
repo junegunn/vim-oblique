@@ -437,6 +437,44 @@ Given:
 Do (Star-search should not fail in the presence of backslashes):
   V*
 
+# (#9) Event
+Execute (Set up custom autocommand):
+  autocmd User Oblique       normal! m`gU$``
+  autocmd User ObliqueStar   normal! m`gUiW``
+  autocmd User ObliqueRepeat normal! ~h
+
+Given:
+  hello
+  -----
+  world
+
+Do:
+  /l\<cr>
+  nn
+
+Expect:
+  heLlO
+  -----
+  worLd
+
+Given:
+  hello
+  -----
+  hello world
+
+Do:
+  ll*n
+
+Expect:
+  HELLO
+  -----
+  Hello world
+
+Execute (Clear autocommands):
+  autocmd! User Oblique
+  autocmd! User ObliqueStar
+  autocmd! User ObliqueRepeat
+
 # (#2) Open fold on match
 Given:
   1. a
