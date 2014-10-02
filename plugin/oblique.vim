@@ -44,7 +44,6 @@ let s:DEFAULT = {
 \ 'enable_fuzzy_search': 1
 \ }
 
-let s:match_ids = {}
 let s:backward  = 0
 let s:fuzzy     = 0
 let s:searchpos = []
@@ -234,7 +233,7 @@ endfunction
 
 function! s:matchadd(...)
   call s:clear_highlight()
-  let s:match_ids[bufnr('%')] = call('matchadd', a:000)
+  let w:match_id = call('matchadd', a:000)
 endfunction
 
 function! g:_oblique_on_change(new, old, cursor)
@@ -331,9 +330,7 @@ endfunction
 
 function! s:clear_highlight(...)
   let bn = a:0 > 0 ? a:1 : bufnr('%')
-  if has_key(s:match_ids, bn)
-    silent! call matchdelete(remove(s:match_ids, bn))
-  endif
+  silent! call matchdelete(w:match_id)
 endfunction
 
 function! s:clear_autocmd()
