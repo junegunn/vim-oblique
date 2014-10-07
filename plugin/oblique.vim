@@ -475,6 +475,7 @@ function! s:star_search(backward, word, gv)
   call s:clear_highlight()
 
   let s:backward = a:backward
+  let s:fuzzy = 0
   let s:view = winsaveview()
   let s:ok = 1
   if a:gv
