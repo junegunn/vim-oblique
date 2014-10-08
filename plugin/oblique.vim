@@ -397,7 +397,7 @@ function! s:next(n, cnt, gv)
     silent! doautocmd User ObliqueRepeat
   catch
     let msg = substitute(v:exception, '.\{-}:', '', '')
-    echohl Error
+    echohl ErrorMsg
     if s:fuzzy && msg =~ '^E486'
       echo s:e486_fuzzy()
     else
@@ -448,7 +448,7 @@ function! s:oblique(gv, backward, fuzzy)
       keepjumps normal! ``
     else
       call pseudocl#render#clear()
-      echohl Error
+      echohl ErrorMsg
       if s:fuzzy
         echon s:e486_fuzzy()
       else
