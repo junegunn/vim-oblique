@@ -46,7 +46,6 @@ let s:DEFAULT = {
 
 let s:backward  = 0
 let s:fuzzy     = 0
-let s:searchpos = []
 let s:offset    = ''
 let s:matching  = ''
 let s:prev      = ''
@@ -184,7 +183,6 @@ function! s:finish()
   let mlen = s:optval('min_length')
   if s:ok
     let s:prev = @/
-    call setpos('.', s:searchpos)
     call winrestview(s:view)
     call s:apply_offset()
     call s:unfold()
@@ -423,7 +421,6 @@ function! s:oblique(gv, backward, fuzzy)
   let history = map(reverse(range(1, &history)), 'histget("/", -v:val)')
   let vmagic  = s:optval('very_magic') ? '\V' : ''
 
-  normal! m`
   try
     let sym = s:backward ? '?' : '/'
     let opts = {
@@ -444,8 +441,7 @@ function! s:oblique(gv, backward, fuzzy)
     if s:search(@/)
       let s:ok        = 1
       let s:view      = winsaveview()
-      let s:searchpos = getpos('.')
-      keepjumps normal! ``
+      call winrestview(s:oview)
     else
       call pseudocl#render#clear()
       echohl ErrorMsg
