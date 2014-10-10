@@ -243,11 +243,7 @@ function! g:_oblique_on_change(new, old, cursor)
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
-    try
-      call s:matchadd("IncSearch", s:prefix_for(pat) . pat)
-    catch
-      " Ignore error
-    endtry
+    call s:highlight_current_match('IncSearch', pat)
     let s:matching = pat
   else
     let s:matching = ''
@@ -352,12 +348,10 @@ function! s:on_cursor_moved(force)
   endif
 endfunction
 
-function! s:highlight_current_match()
-  try
-    call s:matchadd('ObliqueCurrentMatch', s:prefix_for(@/) . @/)
-  catch
-    " ignore error
-  endtry
+function! s:highlight_current_match(...)
+  let group = a:0 > 0 ? a:1 : 'ObliqueCurrentMatch'
+  let pat = a:0 > 1 ? a:2 : @/
+  silent! call s:matchadd(group, s:prefix_for(pat) . pat)
 endfunction
 
 function! s:echo_pattern(n)
