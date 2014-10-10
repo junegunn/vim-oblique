@@ -299,12 +299,12 @@ function! s:set_autocmd()
     autocmd!
     autocmd CursorMoved <buffer> call s:on_cursor_moved(0)
     autocmd InsertEnter <buffer> call s:on_cursor_moved(1)
-    autocmd WinLeave    <buffer> call s:on_win_leave(expand('<abuf>'))
+    autocmd WinLeave    <buffer> call s:on_win_leave()
   augroup END
 endfunction
 
-function! s:on_win_leave(buf)
-  call s:clear_highlight(a:buf)
+function! s:on_win_leave()
+  call s:clear_highlight()
   augroup ObliqueExtra
     autocmd!
     autocmd CursorMoved * call s:on_win_enter()
@@ -326,8 +326,7 @@ function! s:on_win_enter()
   augroup END
 endfunction
 
-function! s:clear_highlight(...)
-  let bn = a:0 > 0 ? a:1 : bufnr('%')
+function! s:clear_highlight()
   silent! call matchdelete(w:match_id)
 endfunction
 
