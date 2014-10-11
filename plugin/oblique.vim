@@ -37,11 +37,12 @@ if !hlexists('ObliqueCurrentMatch')
 endif
 
 let s:DEFAULT = {
-\ 'min_length':          3,
-\ 'clear_highlight':     1,
-\ 'very_magic':          0,
-\ 'enable_star_search':  1,
-\ 'enable_fuzzy_search': 1
+\ 'min_length':              3,
+\ 'incsearch_highlight_all': 0,
+\ 'clear_highlight':         1,
+\ 'very_magic':              0,
+\ 'enable_star_search':      1,
+\ 'enable_fuzzy_search':     1
 \ }
 
 let s:backward  = 0
@@ -219,14 +220,14 @@ function! s:finish_star()
   silent! doautocmd User ObliqueStar
 endfunction
 
-function! s:prefix_for(pat)
+function! s:prefix_for(pat, highlight_all)
   if !&ignorecase ||
         \ (&smartcase && substitute(a:pat, '^\\[CZMV]', '', 'g') =~# '[A-Z]')
     let prefix = '\C'
   else
     let prefix = '\c'
   endif
-  return prefix . '\%'.line('.').'l\%'.col('.').'c'
+  return a:highlight_all ? prefix : prefix . '\%'.line('.').'l\%'.col('.').'c'
 endfunction
 
 function! s:matchadd(...)
@@ -243,7 +244,7 @@ function! g:_oblique_on_change(new, old, cursor)
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
-    call s:highlight_current_match('IncSearch', pat)
+    call s:highlight_current_match('IncSearch', pat, s:optval('incsearch_highlight_all'))
     let s:matching = pat
   else
     let s:matching = ''
@@ -351,7 +352,8 @@ endfunction
 function! s:highlight_current_match(...)
   let group = a:0 > 0 ? a:1 : 'ObliqueCurrentMatch'
   let pat = a:0 > 1 ? a:2 : @/
-  silent! call s:matchadd(group, s:prefix_for(pat) . pat)
+  let highlight_all = a:0 > 2 && a:3
+  silent! call s:matchadd(group, s:prefix_for(pat, highlight_all) . pat)
 endfunction
 
 function! s:echo_pattern(n)
