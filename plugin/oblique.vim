@@ -43,7 +43,6 @@ endif
 let s:DEFAULT = {
 \ 'min_length':              3,
 \ 'incsearch_highlight_all': 0,
-\ 'incsearch_clear_current': 1,
 \ 'clear_highlight':         1,
 \ 'very_magic':              0,
 \ 'enable_star_search':      1,
@@ -257,9 +256,6 @@ function! g:_oblique_on_change(new, old, cursor)
     return
   endif
 
-  if s:optval('incsearch_clear_current')
-    silent! call matchdelete(w:current_match_id)
-  endif
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
