@@ -56,6 +56,8 @@ Use the <Plug> maps in the above table to customize the maps.
     - Patterns shorter than this will not be added to search history
 - `g:oblique#incsearch_highlight_all` (default: 0)
     - To highlight all incremental matches (requires `incsearch`)
+- `g:oblique#incsearch_clear_current` (default: 1)
+    - To clear `ObliqueCurrentMatch` highlight while performing another search
 - `g:oblique#clear_highlight` (default: 1)
     - To clear search highlight or not
 - `g:oblique#very_magic` (default: 0)
@@ -95,6 +97,7 @@ Define the following highlight groups to change the color:
 - `ObliquePrompt` (default: linked to `Label`)
 - `ObliqueLine` (default: linked to `None`)
 - `ObliqueCurrentMatch` (default: linked to `IncSearch`)
+- `ObliqueCurrentIncSearch` (default: linked to `IncSearch`)
 
 #### Example
 
