@@ -216,10 +216,10 @@ endfunction
 
 function! s:finish_star()
   let s:prev = @/
-  silent! normal! N
+  silent! keepjumps normal! N
   let nview = winsaveview()
   if nview.lnum != s:view.lnum || nview.col + len(s:star_word) <= s:view.col
-    silent! normal! n
+    silent! keepjumps normal! n
   endif
   call s:revert_showcmd()
   call s:highlight_current_match()
