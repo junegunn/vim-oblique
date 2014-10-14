@@ -216,10 +216,15 @@ endfunction
 
 function! s:finish_star()
   let s:prev = @/
+  silent! normal! N
+  let nview = winsaveview()
+  if nview.lnum != s:view.lnum || nview.col + len(s:star_word) <= s:view.col
+    silent! normal! n
+  endif
   call s:revert_showcmd()
+  call s:highlight_current_match()
   call winrestview(s:view)
   call s:set_autocmd()
-  call s:highlight_current_match()
   call s:echo_pattern('n')
   if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
