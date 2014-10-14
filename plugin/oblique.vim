@@ -36,12 +36,17 @@ if !hlexists('ObliqueCurrentMatch')
   hi def link ObliqueCurrentMatch IncSearch
 endif
 
+if !hlexists('ObliqueCurrentIncSearch')
+  hi def link ObliqueCurrentIncSearch IncSearch
+endif
+
 let s:DEFAULT = {
-\ 'min_length':          3,
-\ 'clear_highlight':     1,
-\ 'very_magic':          0,
-\ 'enable_star_search':  1,
-\ 'enable_fuzzy_search': 1
+\ 'min_length':              3,
+\ 'incsearch_highlight_all': 0,
+\ 'clear_highlight':         1,
+\ 'very_magic':              0,
+\ 'enable_star_search':      1,
+\ 'enable_fuzzy_search':     1
 \ }
 
 let s:backward  = 0
@@ -179,6 +184,8 @@ endfunction
 
 function! s:finish()
   call s:revert_showcmd()
+  silent! call matchdelete(w:incsearch_id)
+  silent! call matchdelete(w:current_incsearch_id)
   let last = substitute(@/, '^\\[CZMV]', '', 'g')
   let mlen = s:optval('min_length')
   if s:ok
@@ -194,6 +201,7 @@ function! s:finish()
     endif
     silent! doautocmd User Oblique
   else
+    call s:highlight_current_match()
     if len(last) >= mlen
       call histadd('/', @/)
     endif
@@ -219,19 +227,28 @@ function! s:finish_star()
   silent! doautocmd User ObliqueStar
 endfunction
 
-function! s:prefix_for(pat)
+function! s:prefix_for(pat, highlight_all)
   if !&ignorecase ||
         \ (&smartcase && substitute(a:pat, '^\\[CZMV]', '', 'g') =~# '[A-Z]')
     let prefix = '\C'
   else
     let prefix = '\c'
   endif
-  return prefix . '\%'.line('.').'l\%'.col('.').'c'
+  return a:highlight_all ? prefix : prefix . '\%'.line('.').'l\%'.col('.').'c'
 endfunction
 
 function! s:matchadd(...)
-  call s:clear_highlight()
-  let w:match_id = call('matchadd', a:000)
+  let match_id = call('matchadd', a:000)
+  if a:1 ==# 'ObliqueCurrentMatch'
+    silent! call matchdelete(w:current_match_id)
+    let w:current_match_id = match_id
+  elseif a:1 ==# 'IncSearch'
+    silent! call matchdelete(w:incsearch_id)
+    let w:incsearch_id = match_id
+  elseif a:1 ==# 'ObliqueCurrentIncSearch'
+    silent! call matchdelete(w:current_incsearch_id)
+    let w:current_incsearch_id = match_id
+  endif
 endfunction
 
 function! g:_oblique_on_change(new, old, cursor)
@@ -239,13 +256,15 @@ function! g:_oblique_on_change(new, old, cursor)
     return
   endif
 
-  call s:clear_highlight()
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   if s:search(pat)
-    call s:highlight_current_match('IncSearch', pat)
+    call s:highlight_current_match('IncSearch', pat, s:optval('incsearch_highlight_all'))
+    call s:highlight_current_match('ObliqueCurrentIncSearch', pat)
     let s:matching = pat
   else
+    silent! call matchdelete(w:incsearch_id)
+    silent! call matchdelete(w:current_incsearch_id)
     let s:matching = ''
   endif
   if pmatching != s:matching
@@ -300,7 +319,7 @@ function! s:set_autocmd()
 endfunction
 
 function! s:on_win_leave()
-  call s:clear_highlight()
+  silent! call matchdelete(w:current_match_id)
   augroup ObliqueExtra
     autocmd!
     autocmd CursorMoved * call s:on_win_enter()
@@ -322,10 +341,6 @@ function! s:on_win_enter()
   augroup END
 endfunction
 
-function! s:clear_highlight()
-  silent! call matchdelete(w:match_id)
-endfunction
-
 function! s:clear_autocmd()
   execute 'augroup Oblique'.bufnr('%')
     autocmd!
@@ -334,7 +349,7 @@ function! s:clear_autocmd()
 endfunction
 
 function! s:clear()
-  call s:clear_highlight()
+  silent! call matchdelete(w:current_match_id)
   call s:clear_autocmd()
 endfunction
 
@@ -351,7 +366,8 @@ endfunction
 function! s:highlight_current_match(...)
   let group = a:0 > 0 ? a:1 : 'ObliqueCurrentMatch'
   let pat = a:0 > 1 ? a:2 : @/
-  silent! call s:matchadd(group, s:prefix_for(pat) . pat)
+  let highlight_all = a:0 > 2 && a:3
+  silent! call s:matchadd(group, s:prefix_for(pat, highlight_all) . pat)
 endfunction
 
 function! s:echo_pattern(n)
@@ -451,8 +467,6 @@ function! s:oblique(gv, backward, fuzzy)
     call pseudocl#render#clear()
     let s:fuzzy = was_fuzzy
     return @/
-  finally
-    call s:clear_highlight()
   endtry
 endfunction
 
@@ -461,7 +475,7 @@ function! s:escape_star_pattern(pat, backward)
 endfunction
 
 function! s:star_search(backward, word, gv)
-  call s:clear_highlight()
+  silent! call matchdelete(w:current_match_id)
 
   let s:backward = a:backward
   let s:fuzzy = 0
