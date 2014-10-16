@@ -376,19 +376,19 @@ function! s:highlight_current_match(...)
 endfunction
 
 function! s:echo_pattern(n)
+  let xy = [&ruler, &showcmd]
+  set noruler noshowcmd
   echon "\r\r"
-  echohl ObliquePrompt
   let bw = (a:n ==# 'n' ? s:backward : !s:backward)
-  if s:fuzzy
-    echon bw ? 'F?' : 'F/'
-    echohl ObliqueLine
-    echon s:input
-  else
-    echon bw ? '?' : '/'
-    echohl ObliqueLine
-    echon @/
+  let [prompt, str] = s:fuzzy ? [bw ? 'F?' : 'F/', s:input] : [bw ? '?' : '/', @/]
+  echohl ObliquePrompt | echon prompt
+  let max_width = winwidth(winnr()) - 2
+  if strwidth(prompt . str) > max_width
+    echohl NonText | echon '..'
+    let str = str[0 : (max_width - strwidth('..' . prompt))]
   endif
-  echohl None
+  echohl ObliqueLine | echon str | echohl None
+  let [&ruler, &showcmd] = xy
 endfunction
 
 function! s:e486_fuzzy()
