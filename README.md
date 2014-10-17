@@ -60,8 +60,6 @@ Use the <Plug> maps in the above table to customize the maps.
     - To clear search highlight or not
 - `g:oblique#very_magic` (default: 0)
     - To start pattern with `\V` or not
-- `g:oblique#enable_star_search` (default: 1)
-- `g:oblique#enable_fuzzy_search` (default: 1)
 
 ### Events
 

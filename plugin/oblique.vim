@@ -44,9 +44,7 @@ let s:DEFAULT = {
 \ 'min_length':              3,
 \ 'incsearch_highlight_all': 0,
 \ 'clear_highlight':         1,
-\ 'very_magic':              0,
-\ 'enable_star_search':      1,
-\ 'enable_fuzzy_search':     1
+\ 'very_magic':              0
 \ }
 
 let s:backward  = 0
@@ -546,33 +544,30 @@ function! s:define_maps()
   endfor
 
   " Setup default maps
-  let enable_fuzzy_search = s:optval('enable_fuzzy_search')
   for m in ['n', 'x', 'o']
     for d in ['/', '?']
       if !hasmapto('<Plug>(Oblique-'.d.')', m)
         execute m.'map '.d.' <Plug>(Oblique-'.d.')'
       endif
-      if enable_fuzzy_search && !hasmapto('<Plug>(Oblique-F'.d.')', m)
+      if !hasmapto('<Plug>(Oblique-F'.d.')', m)
         execute m.'map z'.d.' <Plug>(Oblique-F'.d.')'
       endif
     endfor
   endfor
 
-  if s:optval('enable_star_search')
-    for m in ['n', 'x']
-      if !hasmapto('<Plug>(Oblique-*)', m)
-        execute m."map * <Plug>(Oblique-*)"
-      endif
-      if !hasmapto('<Plug>(Oblique-#)', m)
-        execute m."map # <Plug>(Oblique-#)"
-      endif
-    endfor
-    if !hasmapto('<Plug>(Oblique-g*)', 'n')
-      execute "nmap g* <Plug>(Oblique-g*)"
+  for m in ['n', 'x']
+    if !hasmapto('<Plug>(Oblique-*)', m)
+      execute m."map * <Plug>(Oblique-*)"
     endif
-    if !hasmapto('<Plug>(Oblique-g#)', 'n')
-      execute "nmap g# <Plug>(Oblique-g#)"
+    if !hasmapto('<Plug>(Oblique-#)', m)
+      execute m."map # <Plug>(Oblique-#)"
     endif
+  endfor
+  if !hasmapto('<Plug>(Oblique-g*)', 'n')
+    execute "nmap g* <Plug>(Oblique-g*)"
+  endif
+  if !hasmapto('<Plug>(Oblique-g#)', 'n')
+    execute "nmap g# <Plug>(Oblique-g#)"
   endif
 
   nnoremap <silent> <Plug>(Oblique-n) :<c-u>call <SID>next('n', v:count1, 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
