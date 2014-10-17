@@ -9,6 +9,8 @@ Execute (Setup):
   autocmd! User ObliqueStar
   autocmd! User ObliqueRepeat
 
+  syntax enable
+
 Before:
   set smartcase ignorecase
   set hlsearch

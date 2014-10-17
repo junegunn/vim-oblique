@@ -617,6 +617,23 @@ Expect:
   5apple
   6apple
 
+# (#21) Search pattern highlighted when it isn't supposed to be
+Given:
+  test this
+  test this
+
+Execute (Search, move, and cancelled search):
+  execute "normal /test\<cr>"
+  Assert !empty(filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")),
+    \ 'Should highlight current match'
+  normal! w
+  doautocmd CursorMoved
+  Assert empty(filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")),
+    \ 'Should clear highlight when cursor is moved'
+  execute "normal /this\<bs>\<bs>\<bs>\<bs>"
+  Assert empty(filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")),
+    \ 'Cancelled search should not restore highlight'
+
 # Cleanup
 # ==============================================================================
 Before:
