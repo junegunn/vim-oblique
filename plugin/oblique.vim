@@ -201,7 +201,6 @@ function! s:finish()
     endif
     silent! doautocmd User Oblique
   else
-    call s:highlight_current_match()
     if len(last) >= mlen
       call histadd('/', @/)
     endif
