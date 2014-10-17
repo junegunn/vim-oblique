@@ -619,20 +619,27 @@ Expect:
 
 # (#21) Search pattern highlighted when it isn't supposed to be
 Given:
-  test this
+    test this
   test this
 
 Execute (Search, move, and cancelled search):
   execute "normal /test\<cr>"
-  Assert !empty(filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")),
-    \ 'Should highlight current match'
+  AssertCurrentMatch 'Should highlight current match'
   normal! w
   doautocmd CursorMoved
-  Assert empty(filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")),
-    \ 'Should clear highlight when cursor is moved'
+  AssertCurrentMatch! 'Should clear highlight when cursor is moved'
   execute "normal /this\<bs>\<bs>\<bs>\<bs>"
-  Assert empty(filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")),
-    \ 'Cancelled search should not restore highlight'
+  AssertCurrentMatch! 'Cancelled search should not restore highlight'
+
+# (#20) gd/gD highlighting breaks after doing some search
+Execute (gd):
+  normal jgd
+  AssertEqual 1, line('.')
+  AssertEqual 3, col('.')
+  AssertCurrentMatch 'Should highlight keyword on gd'
+  normal! w
+  doautocmd CursorMoved
+  AssertCurrentMatch! 'Highlighting cleared on cursor move'
 
 # Cleanup
 # ==============================================================================
@@ -640,4 +647,6 @@ Before:
 After:
 Execute (Cleanup):
   set nohlsearch
+  delfunction CurrentMatch
+  delcommand AssertCurrentMatch
 

@@ -11,6 +11,13 @@ Execute (Setup):
 
   syntax enable
 
+  function! CurrentMatch(exists, msg)
+    Assert a:exists ==
+      \ !empty(filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")),
+      \ a:msg
+  endfunction
+  command! -bang -nargs=1 AssertCurrentMatch call CurrentMatch(empty('<bang>'), <args>)
+
 Before:
   set smartcase ignorecase
   set hlsearch
