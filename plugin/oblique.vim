@@ -588,6 +588,9 @@ function! s:define_maps()
     endif
   endfor
 
+  nnoremap gd gd:normal *<cr>
+  nnoremap gD gD:normal *<cr>
+
   nnoremap <silent> <Plug>(Oblique-Repeat) :call <SID>repeat()<CR>
 endfunction
 
