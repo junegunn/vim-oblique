@@ -219,10 +219,12 @@ endfunction
 
 function! s:finish_star()
   let s:prev = @/
-  silent! keepjumps normal! N
+  if !s:backward
+    silent! keepjumps normal! N
+  endif
   let nview = winsaveview()
-  if nview.lnum != s:view.lnum || nview.col + len(s:star_word) <= s:view.col
-    silent! keepjumps normal! n
+  if nview.lnum != s:view.lnum || nview.col > s:view.col || nview.col + len(s:star_word) <= s:view.col
+    silent! execute 'keepjumps normal! ' . (s:backward ? 'N' : 'n')
   endif
   call s:revert_showcmd()
   call s:highlight_current_match()
