@@ -83,6 +83,28 @@ Do (FIXME CTRL-L):
 
 # /Offsets
 # ==============================================================================
+
+After:
+  AssertEqual "Permission", @"
+Do (/0):
+  /here/0
+  \<CR>
+  yiw
+
+After:
+  AssertEqual "Permission", @"
+Do (/+0):
+  /here/+0
+  \<CR>
+  yiw
+
+After:
+  AssertEqual "Permission", @"
+Do (/-0):
+  /here/-0
+  \<CR>
+  yiw
+
 After:
   AssertEqual "a", @"
 Do (/+):
