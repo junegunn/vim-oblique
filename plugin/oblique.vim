@@ -128,6 +128,12 @@ function! s:apply_offset()
     return
   endif
 
+  let [t, o] = s:match1(s:offset, '^[+-]\?0\+$')
+  if t
+    normal! 0
+    return
+  endif
+
   let [t, o] = s:match1(s:offset, '^+\?\([0-9]\+\)$')
   if t
     execute 'normal! '.o.'j0'
@@ -399,6 +405,7 @@ function! s:next(n, cnt, gv)
   endif
   try
     execute 'normal! '.a:cnt.a:n
+    call s:apply_offset()
     call s:highlight_current_match()
     call s:unfold()
     call s:set_autocmd()
