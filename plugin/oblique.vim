@@ -96,9 +96,10 @@ function! s:search(pat)
     let @/ = a:pat
     try
       let ok = search(a:pat, 'c'. (s:backward ? 'b' : ''))
-      if s:count
+      let steps = s:count - (s:oview.lnum == line('.') && s:oview.col == (col('.') - 1))
+      if steps
         call winrestview(s:oview)
-        execute 'normal! ' . s:count . (s:backward ? 'N' : 'n')
+        execute 'normal! ' . steps . (s:backward ? 'N' : 'n')
       endif
     catch
       let ok = 0
@@ -455,7 +456,7 @@ function! s:next(n, cnt, gv)
 endfunction
 
 function! s:oblique(gv, backward, fuzzy)
-  let s:count    = v:count1 - 1
+  let s:count    = v:count1
   let s:backward = a:backward
   let was_fuzzy  = s:fuzzy
   let s:fuzzy    = a:fuzzy

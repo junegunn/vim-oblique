@@ -681,6 +681,17 @@ Given:
   item 5
 
 Execute (/ and ? with count):
+  normal! gg0
+  execute "normal /item\<cr>"
+  AssertEqual 1, line('.')
+  AssertEqual 1, col('.')
+
+  normal! gg0
+  execute "normal 1/item\<cr>"
+  AssertEqual 1, line('.')
+  AssertEqual 1, col('.')
+
+  normal! gg0
   execute "normal 2/item\<cr>"
   AssertEqual 2, line('.')
   AssertEqual 1, col('.')
@@ -688,6 +699,22 @@ Execute (/ and ? with count):
   AssertEqual 4, line('.')
   AssertEqual 1, col('.')
   execute "normal 2?item\<cr>"
+  AssertEqual 3, line('.')
+  AssertEqual 1, col('.')
+
+Execute (/ with cursor not on the first match):
+  normal! ggw
+  execute "normal /item\<cr>"
+  AssertEqual 2, line('.')
+  AssertEqual 1, col('.')
+
+  normal! ggw
+  execute "normal 1/item\<cr>"
+  AssertEqual 2, line('.')
+  AssertEqual 1, col('.')
+
+  normal! ggw
+  execute "normal 2/item\<cr>"
   AssertEqual 3, line('.')
   AssertEqual 1, col('.')
 
