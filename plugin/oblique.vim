@@ -455,7 +455,7 @@ function! s:next(n, cnt, gv)
 endfunction
 
 function! s:oblique(gv, backward, fuzzy)
-  let s:count    = v:count
+  let s:count    = v:count1 - 1
   let s:backward = a:backward
   let was_fuzzy  = s:fuzzy
   let s:fuzzy    = a:fuzzy
@@ -519,7 +519,7 @@ endfunction
 function! s:star_search(backward, word, gv)
   silent! call matchdelete(w:current_match_id)
 
-  let s:count = v:count
+  let s:count = v:count1 - 1
   let s:backward = a:backward
   let s:fuzzy = 0
   let s:view = winsaveview()

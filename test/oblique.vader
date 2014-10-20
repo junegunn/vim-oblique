@@ -685,10 +685,10 @@ Execute (/ and ? with count):
   AssertEqual 2, line('.')
   AssertEqual 1, col('.')
   execute "normal 3/item\<cr>"
-  AssertEqual 5, line('.')
+  AssertEqual 4, line('.')
   AssertEqual 1, col('.')
   execute "normal 2?item\<cr>"
-  AssertEqual 4, line('.')
+  AssertEqual 3, line('.')
   AssertEqual 1, col('.')
 
 Execute (* and # with count):
@@ -696,10 +696,10 @@ Execute (* and # with count):
   AssertEqual 2, line('.')
   AssertEqual 1, col('.')
   normal 3*
-  AssertEqual 5, line('.')
+  AssertEqual 4, line('.')
   AssertEqual 1, col('.')
   normal 2#
-  AssertEqual 4, line('.')
+  AssertEqual 3, line('.')
   AssertEqual 1, col('.')
 
 # Cleanup
