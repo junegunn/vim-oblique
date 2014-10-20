@@ -672,6 +672,36 @@ Execute (#):
   Assert filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")[0].pattern
     \ =~ '%1c'
 
+# (#26) Add [count] support for all commands
+Given:
+  item 1
+  item 2
+  item 3
+  item 4
+  item 5
+
+Execute (/ and ? with count):
+  execute "normal 2/item\<cr>"
+  AssertEqual 2, line('.')
+  AssertEqual 1, col('.')
+  execute "normal 3/item\<cr>"
+  AssertEqual 5, line('.')
+  AssertEqual 1, col('.')
+  execute "normal 2?item\<cr>"
+  AssertEqual 4, line('.')
+  AssertEqual 1, col('.')
+
+Execute (* and # with count):
+  normal 2*
+  AssertEqual 2, line('.')
+  AssertEqual 1, col('.')
+  normal 3*
+  AssertEqual 5, line('.')
+  AssertEqual 1, col('.')
+  normal 2#
+  AssertEqual 4, line('.')
+  AssertEqual 1, col('.')
+
 # Cleanup
 # ==============================================================================
 Before:
