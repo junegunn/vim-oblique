@@ -92,11 +92,18 @@ function! s:search(pat)
     return 0
   else
     let ok = 0
+    let prev = @/
+    let @/ = a:pat
     try
       let ok = search(a:pat, 'c'. (s:backward ? 'b' : ''))
+      if s:count
+        call winrestview(s:oview)
+        execute 'normal! ' . s:count . (s:backward ? 'N' : 'n')
+      endif
     catch
       let ok = 0
     endtry
+    let @/ = prev
     return ok
   endif
 endfunction
@@ -229,8 +236,14 @@ function! s:finish_star()
     silent! execute 'keepjumps normal! ' . (s:backward ? 'N' : 'n')
   endif
   call s:revert_showcmd()
-  call s:highlight_current_match()
-  call winrestview(s:view)
+  if s:count
+    call winrestview(s:view)
+    execute 'normal! ' . s:count . 'n'
+    call s:highlight_current_match()
+  else
+    call s:highlight_current_match()
+    call winrestview(s:view)
+  endif
   call s:set_autocmd()
   call s:echo_pattern('n')
   if len(s:star_word) < s:optval('min_length')
@@ -442,6 +455,7 @@ function! s:next(n, cnt, gv)
 endfunction
 
 function! s:oblique(gv, backward, fuzzy)
+  let s:count    = v:count
   let s:backward = a:backward
   let was_fuzzy  = s:fuzzy
   let s:fuzzy    = a:fuzzy
@@ -505,6 +519,7 @@ endfunction
 function! s:star_search(backward, word, gv)
   silent! call matchdelete(w:current_match_id)
 
+  let s:count = v:count
   let s:backward = a:backward
   let s:fuzzy = 0
   let s:view = winsaveview()
