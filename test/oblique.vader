@@ -663,6 +663,15 @@ Execute (gd):
   doautocmd CursorMoved
   AssertCurrentMatch! 'Highlighting cleared on cursor move'
 
+# (#25) Fix current word highlighting for star-search
+Given:
+  test this test
+
+Execute (#):
+  normal e#
+  Assert filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")[0].pattern
+    \ =~ '%1c'
+
 # Cleanup
 # ==============================================================================
 Before:
