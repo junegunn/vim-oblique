@@ -203,7 +203,9 @@ function! s:finish()
     if len(last) < mlen
       call histdel('/', -1)
     endif
-    silent! doautocmd User Oblique
+    if exists('#User#Oblique')
+      doautocmd User Oblique
+    endif
   else
     if len(last) >= mlen
       call histadd('/', @/)
@@ -232,7 +234,9 @@ function! s:finish_star()
   if len(s:star_word) < s:optval('min_length')
     call histdel('/', -1)
   endif
-  silent! doautocmd User ObliqueStar
+  if exists('#User#ObliqueStar')
+    doautocmd User ObliqueStar
+  endif
 endfunction
 
 function! s:prefix_for(pat, highlight_all)
@@ -420,7 +424,9 @@ function! s:next(n, cnt, gv)
     call s:unfold()
     call s:set_autocmd()
     call s:echo_pattern(a:n)
-    silent! doautocmd User ObliqueRepeat
+    if exists('#User#ObliqueRepeat')
+      doautocmd User ObliqueRepeat
+    endif
   catch
     let msg = substitute(v:exception, '.\{-}:', '', '')
     echohl ErrorMsg
