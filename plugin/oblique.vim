@@ -455,6 +455,7 @@ function! s:oblique(gv, backward, fuzzy)
     \ 'prompt':    ['ObliquePrompt', (s:fuzzy ? 'F' : '') . sym],
     \ 'input':     vmagic,
     \ 'history':   history,
+    \ 'map':       0,
     \ 'highlight': 'ObliqueLine'
     \ }
     if &incsearch
