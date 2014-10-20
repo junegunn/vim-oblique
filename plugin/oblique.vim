@@ -378,6 +378,16 @@ function! s:highlight_current_match(...)
   silent! call s:matchadd(group, s:prefix_for(pat, highlight_all) . pat)
 endfunction
 
+if exists("*strdisplaywidth")
+  function! s:strwidth(str)
+    return strdisplaywidth(a:str)
+  endfunction
+else
+  function! s:strwidth(str)
+    return len(a:str)
+  endfunction
+endif
+
 function! s:echo_pattern(n)
   let xy = [&ruler, &showcmd]
   set noruler noshowcmd
@@ -386,9 +396,9 @@ function! s:echo_pattern(n)
   let [prompt, str] = s:fuzzy ? [bw ? 'F?' : 'F/', s:input] : [bw ? '?' : '/', @/]
   echohl ObliquePrompt | echon prompt
   let max_width = winwidth(winnr()) - 2
-  if strwidth(prompt . str) > max_width
+  if s:strwidth(prompt . str) > max_width
     echohl NonText | echon '..'
-    let str = str[0 : (max_width - strwidth('..' . prompt))]
+    let str = str[0 : (max_width - s:strwidth('..' . prompt))]
   endif
   echohl ObliqueLine | echon str | echohl None
   let [&ruler, &showcmd] = xy
