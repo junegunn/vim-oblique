@@ -100,6 +100,7 @@ function! s:search(pat)
       if steps
         call winrestview(s:oview)
         execute 'normal! ' . steps . (s:backward ? 'N' : 'n')
+        set nohlsearch
       endif
     catch
       let ok = 0
