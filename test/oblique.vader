@@ -679,6 +679,7 @@ Given:
   item 3
   item 4
   item 5
+  - item 6
 
 Execute (/ and ? with count):
   normal! gg0
@@ -727,6 +728,32 @@ Execute (* and # with count):
   AssertEqual 1, col('.')
   normal 2#
   AssertEqual 3, line('.')
+  AssertEqual 1, col('.')
+
+Execute (* and # with cursor not on the first match):
+  normal! G0
+  normal *
+  AssertEqual 6, line('.')
+  AssertEqual 1, col('.')
+
+  normal! G0
+  normal 1*
+  AssertEqual 6, line('.')
+  AssertEqual 3, col('.')
+
+  normal! G0
+  normal 2*
+  AssertEqual 1, line('.')
+  AssertEqual 1, col('.')
+
+  normal! G0
+  normal #
+  AssertEqual 6, line('.')
+  AssertEqual 1, col('.')
+
+  normal! G0
+  normal 1#
+  AssertEqual 5, line('.')
   AssertEqual 1, col('.')
 
 # Cleanup

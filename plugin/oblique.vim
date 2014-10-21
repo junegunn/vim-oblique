@@ -232,9 +232,10 @@ function! s:finish_star()
     silent! execute 'keepjumps normal! ' . (s:backward ? 'N' : 'n')
   endif
   call s:revert_showcmd()
-  if s:count
+  let steps = s:count - (s:view.lnum == line('.') && s:view.col == (col('.') - 1))
+  if steps > 0
     call winrestview(s:view)
-    execute 'normal! ' . s:count . 'n'
+    execute 'normal! ' . steps . 'n'
     call s:highlight_current_match()
   else
     call s:highlight_current_match()
@@ -515,7 +516,7 @@ endfunction
 function! s:star_search(backward, word, gv)
   silent! call matchdelete(w:current_match_id)
 
-  let s:count = v:count1 - 1
+  let s:count = v:count
   let s:backward = a:backward
   let s:fuzzy = 0
   let s:view = winsaveview()
