@@ -91,22 +91,16 @@ function! s:search(pat)
   if empty(a:pat)
     return 0
   else
-    let ok = 0
-    let prev = @/
-    let @/ = a:pat
     try
-      let ok = search(a:pat, 'c'. (s:backward ? 'b' : ''))
-      let steps = s:count - (s:oview.lnum == line('.') && s:oview.col == (col('.') - 1))
-      if steps
-        call winrestview(s:oview)
-        execute 'normal! ' . steps . (s:backward ? 'N' : 'n')
-        set nohlsearch
-      endif
+      for i in range(1, s:count)
+        if !search(a:pat, (i == 1 ? 'c' : ''). (s:backward ? 'b' : ''))
+          return 0
+        endif
+      endfor
+      return 1
     catch
-      let ok = 0
+      return 0
     endtry
-    let @/ = prev
-    return ok
   endif
 endfunction
 
