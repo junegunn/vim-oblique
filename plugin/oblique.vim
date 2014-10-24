@@ -471,7 +471,7 @@ function! s:oblique(gv, backward, fuzzy)
   try
     let sym = s:backward ? '?' : '/'
     let opts = {
-    \ 'prompt':    ['ObliquePrompt', (s:fuzzy ? 'F' : '') . sym],
+    \ 'prompt':    ['ObliquePrompt', (s:count > 1 ? s:count : '') . (s:fuzzy ? 'F' : '') . sym],
     \ 'input':     vmagic,
     \ 'history':   history,
     \ 'map':       0,
