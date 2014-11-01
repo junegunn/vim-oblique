@@ -60,6 +60,8 @@ Use the <Plug> maps in the above table to customize the maps.
     - To clear search highlight or not
 - `g:oblique#very_magic` (default: 0)
     - To start pattern with `\V` or not
+- `g:oblique#enable_cmap` (default: 1)
+    - Enable experimental cmap emulation
 
 ### Events
 
