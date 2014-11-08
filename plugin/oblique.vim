@@ -288,11 +288,15 @@ function! g:_oblique_on_change(new, old, cursor)
 
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
-  if !empty(a:new) && !empty(s:strip_extra(pat)) && s:search(pat)
+  let empty = empty(a:new) || empty(s:strip_extra(pat))
+  if !empty && s:search(pat)
     call s:highlight_current_match('IncSearch', pat, s:optval('incsearch_highlight_all'))
     call s:highlight_current_match('ObliqueCurrentIncSearch', pat)
     let s:matching = pat
   else
+    if empty
+      call winrestview(s:oview)
+    endif
     silent! call matchdelete(w:incsearch_id)
     silent! call matchdelete(w:current_incsearch_id)
     let s:matching = ''
