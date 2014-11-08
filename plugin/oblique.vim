@@ -190,11 +190,15 @@ function! s:unfold()
   endif
 endfunction
 
+function! s:strip_extra(pat)
+  return substitute(a:pat, '\\[CZMV]\c', '', 'g')
+endfunction
+
 function! s:finish()
   call s:revert_showcmd()
   silent! call matchdelete(w:incsearch_id)
   silent! call matchdelete(w:current_incsearch_id)
-  let last = substitute(@/, '^\\[CZMV]', '', 'g')
+  let last = s:strip_extra(@/)
   let mlen = s:optval('min_length')
   if s:ok
     let s:prev = @/
@@ -253,8 +257,9 @@ function! s:finish_star()
 endfunction
 
 function! s:prefix_for(pat, highlight_all)
-  if !&ignorecase ||
-        \ (&smartcase && substitute(a:pat, '^\\[CZMV]', '', 'g') =~# '[A-Z]')
+  if a:pat =~? '\\c'
+    let prefix = ''
+  elseif !&ignorecase || (&smartcase && s:strip_extra(a:pat) =~# '[A-Z]')
     let prefix = '\C'
   else
     let prefix = '\c'
@@ -283,7 +288,7 @@ function! g:_oblique_on_change(new, old, cursor)
 
   let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
-  if s:search(pat)
+  if !empty(a:new) && !empty(s:strip_extra(pat)) && s:search(pat)
     call s:highlight_current_match('IncSearch', pat, s:optval('incsearch_highlight_all'))
     call s:highlight_current_match('ObliqueCurrentIncSearch', pat)
     let s:matching = pat
