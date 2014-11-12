@@ -50,7 +50,6 @@ let s:DEFAULT = {
 
 let s:backward  = 0
 let s:fuzzy     = 0
-let s:offset    = ''
 let s:matching  = ''
 let s:prev      = ''
 
@@ -67,28 +66,29 @@ function! s:match1(expr, pat)
   endif
 endfunction
 
+" TODO ;{pattern}  perform another search, see |//;|
+function! s:split(repeat, pat)
+  return matchlist(a:pat, '\(.\{-}\)\(\\\@<!'.a:repeat.'[esb]\?[+-]\?[0-9]*\)\?$')[1:2]
+endfunction
+
 function! s:build_pattern(pat, repeat, fuzzy)
-  let pat = a:pat
+  let [pat, offset] = s:split(a:repeat, a:pat)
   let prev = empty(s:prev) ? histget('/', -1) : s:prev
-  if (empty(pat) || pat == a:repeat) && !empty(prev)
-    let pat = prev
-  elseif a:fuzzy
+
+  if a:fuzzy
     let chars = map(split(pat, '.\zs'), 'escape(v:val, "\\[]^$.*")')
     let pat = join(
       \ extend(map(chars[0 : -2], 'v:val . "[^" .v:val. "]\\{-}"'),
       \ chars[-1:-1]), '')
+  elseif empty(pat) && !empty(prev)
+    let pat = prev
   endif
 
-  let [t, offset] = s:match1(pat, '\\\@<!'.a:repeat.'\([esb]\?[+-]\?[0-9]*\)$')
-  if t
-    let pat = strpart(pat, 0, len(pat) - len(offset) - 1)
-  endif
-
-  return [pat, offset]
+  return [pat, offset[1:-1]]
 endfunction
 
 function! s:search(pat)
-  call winrestview(s:oview)
+  call winrestview(s:view)
   if empty(a:pat)
     return 0
   else
@@ -97,84 +97,15 @@ function! s:search(pat)
         if !search(a:pat, (i == 1 ? 'c' : ''). (s:backward ? 'b' : ''))
           return 0
         endif
+        if i == 1
+          let s:stay = s:view.lnum == line('.') && s:view.col == col('.') - 1
+        endif
       endfor
       return 1
     catch
       return 0
     endtry
   endif
-endfunction
-
-" :help search-offset
-function! s:apply_offset()
-  if empty(s:offset) || s:offset =~ '^[sb]$'
-    return
-  elseif s:offset == 'e'
-    execute "normal! gn\<Esc>"
-    return
-  elseif s:offset == '+'
-    normal! j0
-    return
-  elseif s:offset == '-'
-    normal! k0
-    return
-  elseif s:offset =~ '^[sb]+$'
-    normal! l
-    return
-  elseif s:offset =~ '^[sb]-$'
-    normal! h
-    return
-  elseif s:offset =~ '^e+$'
-    execute "normal! gn\<Esc>l"
-    return
-  elseif s:offset =~ '^e-$'
-    execute "normal! gn\<Esc>h"
-    return
-  endif
-
-  let [t, o] = s:match1(s:offset, '^[+-]\?0\+$')
-  if t
-    normal! 0
-    return
-  endif
-
-  let [t, o] = s:match1(s:offset, '^+\?\([0-9]\+\)$')
-  if t
-    execute 'normal! '.o.'j0'
-    return
-  endif
-
-  let [t, o] = s:match1(s:offset, '^-\([0-9]\+\)$')
-  if t
-    execute 'normal! '.o.'k0'
-    return
-  endif
-
-  let [t, o] = s:match1(s:offset, '^[sb]+\?\([0-9]\+\)$')
-  if t
-    execute 'normal! '.o.'l'
-    return
-  endif
-
-  let [t, o] = s:match1(s:offset, '^[sb]-\([0-9]\+\)$')
-  if t
-    execute 'normal! '.o.'h'
-    return
-  endif
-
-  let [t, o] = s:match1(s:offset, '^e+\?\([0-9]\+\)$')
-  if t
-    execute "normal! gn\<Esc>".o.'l'
-    return
-  endif
-
-  let [t, o] = s:match1(s:offset, '^e-\([0-9]\+\)$')
-  if t
-    execute "normal! gn\<Esc>".o.'h'
-    return
-  endif
-
-  " TODO ;{pattern}  perform another search, see |//;|
 endfunction
 
 function! s:revert_showcmd()
@@ -203,7 +134,8 @@ function! s:finish()
   if s:ok
     let s:prev = @/
     call winrestview(s:view)
-    call s:apply_offset()
+    execute s:move(s:backward)
+    call s:echo_pattern('n')
     call s:unfold()
     call s:set_autocmd()
     call s:highlight_current_match()
@@ -229,23 +161,23 @@ endfunction
 
 function! s:finish_star()
   let s:prev = @/
-  if !s:backward
-    silent! keepjumps normal! N
-  endif
-  let nview = winsaveview()
-  if nview.lnum != s:view.lnum || nview.col > s:view.col || nview.col + len(s:star_word) <= s:view.col
-    silent! execute 'keepjumps normal! ' . (s:backward ? 'N' : 'n')
-  endif
   call s:revert_showcmd()
-  let steps = s:count - (s:view.lnum == line('.') && s:view.col == (col('.') - 1))
-  if steps > 0
-    call winrestview(s:view)
-    execute 'normal! ' . steps . 'n'
-    call s:highlight_current_match()
-  else
-    call s:highlight_current_match()
-    call winrestview(s:view)
+  call winrestview(s:view)
+
+  let under = getline('.')[col('.') - 1] =~ '\k' ||
+           \  getline('.')[col('.') :-1] !~ '\k'
+  if s:count > 1
+    execute 'normal! ' . (s:count - under) . 'n'
   endif
+  let pos = winsaveview()
+  if under
+    normal! l
+    execute 'keepjumps normal!' (s:backward ? 'n' : 'N')
+  elseif s:count == 1
+    execute 'keepjumps normal!' (s:backward ? 'N' : 'n')
+  endif
+  call s:highlight_current_match()
+  call winrestview(pos)
   call s:set_autocmd()
   call s:echo_pattern('n')
   if len(s:star_word) < s:optval('min_length')
@@ -286,7 +218,7 @@ function! g:_oblique_on_change(new, old, cursor)
     return
   endif
 
-  let [pat, off] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
+  let [pat, _] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
   let pmatching = s:matching
   let empty = empty(a:new) || empty(s:strip_extra(pat))
   if !empty && s:search(pat)
@@ -295,7 +227,7 @@ function! g:_oblique_on_change(new, old, cursor)
     let s:matching = pat
   else
     if empty
-      call winrestview(s:oview)
+      call winrestview(s:view)
     endif
     silent! call matchdelete(w:incsearch_id)
     silent! call matchdelete(w:current_incsearch_id)
@@ -419,7 +351,11 @@ function! s:echo_pattern(n)
   set noruler noshowcmd
   echon "\r\r"
   let bw = (a:n ==# 'n' ? s:backward : !s:backward)
-  let [prompt, str] = s:fuzzy ? [bw ? 'F?' : 'F/', s:input] : [bw ? '?' : '/', @/]
+  let sym = bw ? '?' : '/'
+  let [prompt, str] = s:fuzzy ? ['F'.sym, s:input] : [sym, s:term]
+  if !s:fuzzy && !empty(s:offset)
+    let str .= sym . s:offset
+  endif
   echohl ObliquePrompt | echon prompt
   let max_width = winwidth(winnr()) - 2
   if s:strwidth(prompt . str) > max_width
@@ -435,13 +371,15 @@ function! s:e486_fuzzy()
 endfunction
 
 function! s:next(n, cnt, gv)
+  let s:term = get(s:, 'term', @/)
+  let s:offset = get(s:, 'offset', '')
+  let s:count = get(s:, 'count', 1)
   call s:clear()
   if a:gv
     normal! gv
   endif
   try
     execute 'normal! '.a:cnt.a:n
-    call s:apply_offset()
     call s:highlight_current_match()
     call s:unfold()
     call s:set_autocmd()
@@ -467,8 +405,8 @@ function! s:oblique(gv, backward, fuzzy)
   let was_fuzzy  = s:fuzzy
   let s:fuzzy    = a:fuzzy
   let s:ok       = 0
-  let s:oview    = winsaveview()
-  let s:offset   = ''
+  let s:stay     = 0
+  let s:view     = winsaveview()
   let s:matching = ''
 
   if a:gv
@@ -495,24 +433,26 @@ function! s:oblique(gv, backward, fuzzy)
     endif
 
     let s:input = pseudocl#start(opts)
-    let [@/, s:offset] = s:build_pattern(s:input, sym, s:fuzzy)
-    if s:search(@/)
-      let s:ok        = 1
-      let s:view      = winsaveview()
-      call winrestview(s:oview)
+    let [pat, offset] = s:build_pattern(s:input, sym, s:fuzzy)
+    if s:search(pat)
+      let s:ok = 1
+      " FIXME: does not try to retain the position when offset part is given
+      let s:stay = empty(offset) && s:stay
+      let s:term = pat
+      let s:offset = offset
     else
       call pseudocl#render#clear()
       echohl ErrorMsg
       if s:fuzzy
         echon s:e486_fuzzy()
       else
-        echon 'E486: Pattern not found: '. @/
+        echon 'E486: Pattern not found: '. pat.offset
       endif
       echohl None
     endif
-    return @/
+    return pat
   catch 'exit'
-    call winrestview(s:oview)
+    call winrestview(s:view)
     call pseudocl#render#clear()
     let s:fuzzy = was_fuzzy
     return @/
@@ -526,11 +466,12 @@ endfunction
 function! s:star_search(backward, word, gv)
   silent! call matchdelete(w:current_match_id)
 
-  let s:count = v:count
+  let s:count = v:count1
   let s:backward = a:backward
   let s:fuzzy = 0
   let s:view = winsaveview()
   let s:ok = 1
+  let s:stay = 0
   if a:gv
     let [xreg, xregtype] = [getreg('x'), getregtype('x')]
     silent! normal! gv"xy
@@ -548,6 +489,8 @@ function! s:star_search(backward, word, gv)
     let pat = (esc[0] =~ '\k' && a:word) ? ('\V\<' . esc . '\>') : ('\V' . esc)
   endif
 
+  let s:term = pat
+  let s:offset = ''
   return pat
 endfunction
 
@@ -560,7 +503,9 @@ function! s:ok()
 endfunction
 
 function! s:move(bw)
-  return "normal! ". (a:bw ? '?' : '/') . @/ . "\<CR>"
+  let sym = (a:bw ? '?' : '/')
+  let off = empty(s:offset) ? '' : (sym . s:offset)
+  return "normal! ". s:count . sym . s:term . off . "\<CR>" . (s:stay ? 'N' : '')
 endfunction
 
 function! s:define_maps()

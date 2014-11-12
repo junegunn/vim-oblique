@@ -121,6 +121,13 @@ Do (/3):
 
 After:
   AssertEqual "without", @"
+Do (Repeat with //3):
+  //3
+  \<CR>
+  yiw
+
+After:
+  AssertEqual "without", @"
 Do (/+3):
   /here/+3
   \<CR>
@@ -739,7 +746,7 @@ Execute (* and # with cursor not on the first match):
   normal! G0
   normal 1*
   AssertEqual 6, line('.')
-  AssertEqual 3, col('.')
+  AssertEqual 1, col('.')
 
   normal! G0
   normal 2*
@@ -753,8 +760,19 @@ Execute (* and # with cursor not on the first match):
 
   normal! G0
   normal 1#
-  AssertEqual 5, line('.')
+  AssertEqual 6, line('.')
   AssertEqual 1, col('.')
+
+Execute (Correct highlighting on * and #):
+  normal G0*
+  let match = filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")[0].pattern
+  Assert match =~ '%6l'
+  Assert match =~ '%3c'
+
+  normal G0#
+  let match = filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")[0].pattern
+  Assert match =~ '%6l'
+  Assert match =~ '%3c'
 
 # Cleanup
 # ==============================================================================
@@ -762,6 +780,7 @@ Before:
 After:
 Execute (Cleanup):
   set nohlsearch
+  unlet match
   delfunction CurrentMatch
   delcommand AssertCurrentMatch
 
