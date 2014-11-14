@@ -159,13 +159,13 @@ function! s:repeat()
   silent! call repeat#set("\<Plug>(Oblique-Repeat)")
 endfunction
 
-function! s:finish_star()
+function! s:finish_star(gv)
   let s:prev = @/
   call s:revert_showcmd()
   call winrestview(s:view)
 
-  let under = getline('.')[col('.') - 1] =~ '\k' ||
-           \  getline('.')[col('.') :-1] !~ '\k'
+  let under = a:gv || getline('.')[col('.') - 1] =~ '\k' ||
+                    \ getline('.')[col('.') :-1] !~ '\k'
   if s:count > 1
     execute 'normal! ' . (s:count - under) . 'n'
   endif
@@ -531,8 +531,8 @@ function! s:define_maps()
     for m in ['n', 'x']
       if !w && m == 'x' | continue | endif
       execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>star_search(%d, %d, %d)<BAR>'
-        \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star()<BAR>endif<CR>',
-        \ cmd, bw, w, m == 'x', bw)
+        \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star(%d)<BAR>endif<CR>',
+        \ cmd, bw, w, m == 'x', bw, m == 'x')
     endfor
   endfor
 
