@@ -779,7 +779,7 @@ Given:
     item
 
 Execute (#39 Visual-* on the region starting with non-keyword character):
-  normal Glvft*
+  normal G0lvft*
   let match = filter(getmatches(), "v:val.group == 'ObliqueCurrentMatch'")[0].pattern
   Assert match =~ '%2l', match
   Assert match =~ '%2c', match
