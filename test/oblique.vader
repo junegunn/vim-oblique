@@ -797,6 +797,9 @@ Execute (#40 Escape / or ? when valid offset is not given):
   execute "normal ?item?item\<cr>"
   AssertEqual 'item\?item', @/
 
+  execute "normal /item\\/item2\<cr>"
+  AssertEqual 'item\/item2', @/
+
 # Cleanup
 # ==============================================================================
 Before:

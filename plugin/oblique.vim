@@ -86,7 +86,7 @@ function! s:build_pattern(pat, repeat, fuzzy)
 
   let offset = offset[1:-1]
   if empty(offset)
-    let pat = escape(pat, a:repeat)
+    let pat = substitute(pat, '\\\@<!'.a:repeat, '\\'.a:repeat, 'g')
   endif
   return [pat, offset]
 endfunction
