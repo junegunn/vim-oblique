@@ -84,7 +84,11 @@ function! s:build_pattern(pat, repeat, fuzzy)
     let pat = prev
   endif
 
-  return [pat, offset[1:-1]]
+  let offset = offset[1:-1]
+  if empty(offset)
+    let pat = escape(pat, a:repeat)
+  endif
+  return [pat, offset]
 endfunction
 
 function! s:search(pat)

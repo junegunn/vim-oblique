@@ -784,6 +784,19 @@ Execute (#39 Visual-* on the region starting with non-keyword character):
   Assert match =~ '%2l', match
   Assert match =~ '%2c', match
 
+Execute (#40 Escape / or ? when valid offset is not given):
+  execute "normal /item/e\<cr>"
+  AssertEqual 'item', @/
+
+  execute "normal /item/item\<cr>"
+  AssertEqual 'item\/item', @/
+
+  execute "normal ?item?e\<cr>"
+  AssertEqual 'item', @/
+
+  execute "normal ?item?item\<cr>"
+  AssertEqual 'item\?item', @/
+
 # Cleanup
 # ==============================================================================
 Before:
