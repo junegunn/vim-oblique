@@ -310,8 +310,8 @@ Expect:
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Very magic
-# ==============================================================================
+^ Very magic (deprecated)
+^ ==============================================================================
 After:
   AssertEqual [1, 1], [line('.'), col('.')]
 Do (/.):
@@ -339,6 +339,24 @@ Do (Delete prepended \V):
 After:
 Execute (Unlet g:oblique#very_magic):
   unlet g:oblique#very_magic
+
+# Prefix
+# ==============================================================================
+
+After:
+Execute (Set g:oblique#very_magic):
+  let g:oblique#prefix = '\V'
+
+After:
+  AssertEqual [14, 63], [line('.'), col('.')]
+Do (\V is automatically prepended to .):
+  /.\<cr>
+
+After:
+  AssertEqual [1, 1], [line('.'), col('.')]
+  unlet g:oblique#prefix
+Do (Delete prepended \V):
+  /\<c-u>.\<cr>
 
 # Star-search
 # ==============================================================================

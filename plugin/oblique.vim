@@ -45,6 +45,7 @@ let s:DEFAULT = {
 \ 'incsearch_highlight_all': 0,
 \ 'clear_highlight':         1,
 \ 'very_magic':              0,
+\ 'prefix':                  '',
 \ 'enable_cmap':             1
 \ }
 
@@ -424,7 +425,7 @@ function! s:oblique(gv, backward, fuzzy)
     let sym = s:backward ? '?' : '/'
     let opts = {
     \ 'prompt':    ['ObliquePrompt', (s:count > 1 ? s:count : '') . (s:fuzzy ? 'F' : '') . sym],
-    \ 'input':     vmagic,
+    \ 'input':     s:optval('prefix') . vmagic,
     \ 'history':   history,
     \ 'map':       s:optval('enable_cmap'),
     \ 'highlight': 'ObliqueLine'
