@@ -418,7 +418,7 @@ function! s:oblique(gv, backward, fuzzy)
   endif
 
   let history = map(reverse(range(1, &history)), 'histget("/", -v:val)')
-  let vmagic  = s:optval('very_magic') ? '\V' : ''
+  let vmagic  = s:optval('very_magic') ? '\v' : ''
 
   try
     let sym = s:backward ? '?' : '/'
