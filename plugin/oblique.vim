@@ -41,11 +41,11 @@ if !hlexists('ObliqueCurrentIncSearch')
 endif
 
 let s:DEFAULT = {
-\ 'min_length':              3,
-\ 'incsearch_highlight_all': 0,
-\ 'clear_highlight':         1,
-\ 'very_magic':              0,
-\ 'enable_cmap':             1
+\ 'min_length':               3,
+\ 'incsearch_highlight_all':  0,
+\ 'clear_highlight':          1,
+\ 'vprefix':                  0,
+\ 'enable_cmap':              1
 \ }
 
 let s:backward  = 0
@@ -418,13 +418,13 @@ function! s:oblique(gv, backward, fuzzy)
   endif
 
   let history = map(reverse(range(1, &history)), 'histget("/", -v:val)')
-  let vmagic  = s:optval('very_magic') ? '\v' : ''
+  let vprefix  = s:optval('vprefix')
 
   try
     let sym = s:backward ? '?' : '/'
     let opts = {
     \ 'prompt':    ['ObliquePrompt', (s:count > 1 ? s:count : '') . (s:fuzzy ? 'F' : '') . sym],
-    \ 'input':     vmagic,
+    \ 'input':     vprefix,
     \ 'history':   history,
     \ 'map':       s:optval('enable_cmap'),
     \ 'highlight': 'ObliqueLine'
