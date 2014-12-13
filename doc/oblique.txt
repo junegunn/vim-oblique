@@ -1,0 +1,160 @@
+oblique.txt	oblique	Last change: December 14 2014
+OBLIQUE - TABLE OF CONTENTS                                *oblique* *oblique-toc*
+==============================================================================
+
+  vim-oblique
+    Installation                                               |oblique-1|
+    Usage                                                      |oblique-2|
+    Customization                                              |oblique-3|
+      Maps                                                     |oblique-3-1|
+      Options                                                  |oblique-3-2|
+      Events                                                   |oblique-3-3|
+      Highlighting                                             |oblique-3-4|
+        Example                                                |oblique-3-4-1|
+    License                                                    |oblique-4|
+
+
+VIM-OBLIQUE                                                        *vim-oblique*
+==============================================================================
+
+Improved `/`-search for Vim.
+
+ - Different highlight for the match under the cursor
+ - Automatically clears search highlight when cursor is moved
+ - Does not append short patterns to search history
+ - Readline key bindings
+ - Fuzzy-search
+ - Improved star-search (visual-mode, highlighting without moving)
+
+
+                                                                     *oblique-1*
+INSTALLATION                                              *oblique-installation*
+==============================================================================
+
+Use your favorite plugin manager. vim-oblique requires {vim-pseudocl}{1}.
+
+With {vim-plug}{2}:
+>
+    Plug 'junegunn/vim-pseudocl'
+    Plug 'junegunn/vim-oblique'
+<
+                                  {1} https://github.com/junegunn/vim-pseudocl
+                                  {2} https://github.com/junegunn/vim-plug
+
+
+                                                                     *oblique-2*
+USAGE                                                            *oblique-usage*
+==============================================================================
+
+vim-oblique overrides the following keys by default:
+
+     *<Plug>(Oblique-/)* *<Plug>(Oblique-?)* *<Plug>(Oblique-F/)* *<Plug>(Oblique-F?)*
+      *<Plug>(Oblique-n)* *<Plug>(Oblique-N)* *<Plug>(Oblique-#)* *<Plug>(Oblique-g#)*
+
+ ------------+--------------------+-------------------------------------------------
+ Default Key | <Plug> map         | Description                                     ~
+ ------------+--------------------+-------------------------------------------------
+  `/`          | <Plug>(Oblique-/)  | Forward search
+  `?`          | <Plug>(Oblique-?)  | Backward search
+  `z/`         | <Plug>(Oblique-F/) | Forward fuzzy-search
+  `z?`         | <Plug>(Oblique-F?) | Backward fuzzy-search
+  `n`          | <Plug>(Oblique-n)  | Repeat the last search
+  `N`          | <Plug>(Oblique-N)  | Repeat the last search in the opposite direction
+  `*`          | <Plug>(Oblique-*)  | Forward star-search (in normal and visual mode)
+  `#`          | <Plug>(Oblique-#)  | Backward star-search (in normal and visual mode)
+  `g*`         | <Plug>(Oblique-g*) | Forward star-search (no word boundary match)
+  `g#`         | <Plug>(Oblique-g#) | Backward star-search (no word boundary match)
+ ------------+--------------------+-------------------------------------------------
+
+(Unlike the default star-search, the overridden version will not move the
+cursor)
+
+
+                                                                     *oblique-3*
+CUSTOMIZATION                                            *oblique-customization*
+==============================================================================
+
+
+< Maps >______________________________________________________________________~
+                                                                  *oblique-maps*
+                                                                   *oblique-3-1*
+
+Use the <Plug> maps in the above table to customize the maps.
+
+
+< Options >___________________________________________________________________~
+                                                               *oblique-options*
+                                                                   *oblique-3-2*
+
+                        *g:oblique#min_length* *g:oblique#incsearch_highlight_all*
+              *g:oblique#clear_highlight* *g:oblique#prefix* *g:oblique#enable_cmap*
+
+ - `g:oblique#min_length` (default: 3)
+   - Patterns shorter than this will not be added to search history
+ - `g:oblique#incsearch_highlight_all` (default: 0)
+   - To highlight all incremental matches (requires `incsearch`)
+ - `g:oblique#clear_highlight` (default: 1)
+   - To clear search highlight or not
+ - `g:oblique#prefix` (default: "')
+   - Option to prefix pattern with
+ - `g:oblique#enable_cmap` (default: 1)
+   - Enable experimental cmap emulation
+
+
+< Events >____________________________________________________________________~
+                                                                *oblique-events*
+                                                                   *oblique-3-3*
+
+You can customize the behavior of vim-oblique by registering custom actions to
+the following events of `User` group.
+
+ ----------------+---------------------
+ Event           | When                ~
+ ----------------+---------------------
+  `Oblique`        |  `/` ,  `?` ,  `z/` ,  `z?`
+  `ObliqueStar`    |  `*` ,  `#` ,  `g*` ,  `g#`
+  `ObliqueRepeat`  |  `n` ,  `N`
+ ----------------+---------------------
+
+The following example will move your cursor line to the middle of the screen
+after search.
+>
+    " Clear autocommand
+    autocmd! User Oblique
+    autocmd! User ObliqueStar
+    autocmd! User ObliqueRepeat
+
+    autocmd User Oblique       normal! zz
+    autocmd User ObliqueStar   normal! zz
+    autocmd User ObliqueRepeat normal! zz
+<
+
+< Highlighting >______________________________________________________________~
+                                                          *oblique-highlighting*
+                                                                   *oblique-3-4*
+
+Define the following highlight groups to change the color:
+
+ - `ObliquePrompt` (default: linked to `Label`)
+ - `ObliqueLine` (default: linked to `None`)
+ - `ObliqueCurrentMatch` (default: linked to `IncSearch`)
+ - `ObliqueCurrentIncSearch` (default: linked to `IncSearch`)
+
+
+Example~
+                                                               *oblique-example*
+                                                                 *oblique-3-4-1*
+>
+    hi! def link ObliqueCurrentMatch Keyword
+    hi! def link ObliquePrompt       Structure
+    hi! def link ObliqueLine         String
+<
+
+                                                                     *oblique-4*
+LICENSE                                                        *oblique-license*
+==============================================================================
+
+MIT
+
+==============================================================================
+vim:tw=78:sw=2:ts=2:ft=help:norl:nowrap:

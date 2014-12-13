@@ -28,7 +28,7 @@ Usage
 
 vim-oblique overrides the following keys by default:
 
-| Default Key | <Plug> map           | Description                                      |
+| Default Key | `<Plug>` map           | Description                                      |
 | ----------- | -------------------- | ------------------------------------------------ |
 | `/`         | `<Plug>(Oblique-/)`  | Forward search                                   |
 | `?`         | `<Plug>(Oblique-?)`  | Backward search                                  |
@@ -48,7 +48,7 @@ Customization
 
 ### Maps
 
-Use the <Plug> maps in the above table to customize the maps.
+Use the `<Plug>` maps in the above table to customize the maps.
 
 ### Options
 
