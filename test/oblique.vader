@@ -3,63 +3,65 @@ Include: setup.vader
 # Basic search
 # ==============================================================================
 
-After:
+Do (Highlight NOT cleared when cursor is not moved):
+  /license\<cr>
+Then:
   AssertEqual [3, 5], [line('.'), col('.')]
   AssertEqual 1, &hlsearch
   doautocmd CursorMoved
   AssertEqual 1, &hlsearch
-Do (Highlight NOT cleared when cursor is not moved):
-  /license\<cr>
 
-After:
+Do (Highlight cleared when cursor is moved):
+  /license\<cr>l
+Then:
   AssertEqual [3, 6], [line('.'), col('.')]
   AssertEqual 1, &hlsearch
   doautocmd CursorMoved
   AssertEqual 0, &hlsearch
-Do (Highlight cleared when cursor is moved):
-  /license\<cr>l
 
-After:
-  AssertEqual 0, &hlsearch
 Do (Highlight cleared when switched to insert mode):
   /license\<cr>i\<esc>
+Then:
+  AssertEqual 0, &hlsearch
 
-After:
+Do (Highlight is restored on n):
+  /license\<cr>ln
+Then:
   AssertEqual [9, 16], [line('.'), col('.')]
   AssertEqual 1, &hlsearch
   doautocmd CursorMoved
   AssertEqual 1, &hlsearch
-Do (Highlight is restored on n):
-  /license\<cr>ln
 
-After:
 Execute (g:oblique#clear_highlight set to 0):
   let g:oblique#clear_highlight = 0
   " To clear lingering autocmd
   doautocmd CursorMoved
 
-After:
-  AssertEqual 1, &hlsearch
 Do (Highlight not cleared even when switched to insert mode):
   /license\<cr>i\<esc>
+Then:
+  AssertEqual 1, &hlsearch
 
-After:
 Execute (Unlet g:oblique#clear_highlight):
   unlet g:oblique#clear_highlight
 
-After:
-  AssertEqual 8, line('.')
-  doautocmd CursorMoved
-  AssertEqual 1, &hlsearch
 Do (n and N on forward search):
   /copy\<cr>
   nnnN
+Then:
+  AssertEqual 8, line('.')
+  doautocmd CursorMoved
+  AssertEqual 1, &hlsearch
+
 Do (n and N on backward search):
   G
   ?copy\<cr>
   nnnN
+Then:
+  AssertEqual 8, line('.')
+  doautocmd CursorMoved
+  AssertEqual 1, &hlsearch
 
-After:
 Do (/ with command):
   5G
   d/dealings\<cr>
@@ -74,209 +76,207 @@ Expect:
 # CTRL-L
 # ==============================================================================
 
-After:
-  AssertEqual "hereby gr", @"
 Do (FIXME CTRL-L):
   /here
   \<C-L>\<C-L>\<C-L>\<C-L>\<C-L>\<CR>
   gny
+Then:
+  AssertEqual "hereby gr", @"
 
 # /Offsets
 # ==============================================================================
 
-After:
-  AssertEqual "Permission", @"
 Do (/0):
   /here/0
   \<CR>
   yiw
-
-After:
+Then:
   AssertEqual "Permission", @"
+
 Do (/+0):
   /here/+0
   \<CR>
   yiw
-
-After:
+Then:
   AssertEqual "Permission", @"
+
 Do (/-0):
   /here/-0
   \<CR>
   yiw
+Then:
+  AssertEqual "Permission", @"
 
-After:
-  AssertEqual "a", @"
 Do (/+):
   /here/+
   \<CR>
   yiw
+Then:
+  AssertEqual "a", @"
 
-After:
-  AssertEqual "without", @"
 Do (/3):
   /here/3
   \<CR>
   yiw
-
-After:
+Then:
   AssertEqual "without", @"
+
 Do (Repeat with //3):
   //3
   \<CR>
   yiw
-
-After:
+Then:
   AssertEqual "without", @"
+
 Do (/+3):
   /here/+3
   \<CR>
   yiw
+Then:
+  AssertEqual "without", @"
 
-After:
-  AssertEqual "\n", @"
 Do (/-):
   /here/-
   \<CR>
   yy
+Then:
+  AssertEqual "\n", @"
 
-After:
-  AssertEqual "MIT", @"
 Do (/-2):
   /here/-2
   \<CR>
   yiw
+Then:
+  AssertEqual "MIT", @"
 
-After:
-  AssertEqual "herby", @"
 Do (/e):
   /here/e
   \<CR>
   xyiw
+Then:
+  AssertEqual "herby", @"
 
-After:
-  AssertEqual "herey", @"
 Do (/e+):
   /here/e+
   \<CR>
   xyiw
+Then:
+  AssertEqual "herey", @"
 
-After:
-  AssertEqual "hereb", @"
 Do (/e2):
   /here/e2
   \<CR>
   xbyiw
-
-After:
+Then:
   AssertEqual "hereb", @"
+
 Do (/e+2):
   /here/e+2
   \<CR>
   xbyiw
+Then:
+  AssertEqual "hereb", @"
 
-After:
-  AssertEqual "heeby", @"
 Do (/e-):
   /here/e-
   \<CR>
   xyiw
+Then:
+  AssertEqual "heeby", @"
 
-After:
-  AssertEqual "Permision", @"
 Do (/e-12):
   /here/e-12
   \<CR>
   xyiw
+Then:
+  AssertEqual "Permision", @"
 
-After:
-  AssertEqual "ereby", @"
 Do (/s):
   /here/s
   \<CR>
   xyiw
-
-After:
+Then:
   AssertEqual "ereby", @"
+
 Do (/b):
   /here/b
   \<CR>
   xyiw
+Then:
+  AssertEqual "ereby", @"
 
-After:
-  AssertEqual "hreby", @"
 Do (/s+):
   /here/s+
   \<CR>
   xyiw
-
-After:
+Then:
   AssertEqual "hreby", @"
+
 Do (/b+):
   /here/b+
   \<CR>
   xyiw
+Then:
+  AssertEqual "hreby", @"
 
-After:
-  AssertEqual "heeby", @"
 Do (/s2):
   /here/s2
   \<CR>
   xyiw
-
-After:
+Then:
   AssertEqual "heeby", @"
+
 Do (/b2):
   /here/b2
   \<CR>
   xyiw
-
-After:
+Then:
   AssertEqual "heeby", @"
+
 Do (/s+2):
   /here/s+2
   \<CR>
   xyiw
-
-After:
+Then:
   AssertEqual "heeby", @"
+
 Do (/b+2):
   /here/b+2
   \<CR>
   xyiw
+Then:
+  AssertEqual "heeby", @"
 
-After:
-  AssertEqual "ishereby", @"
 Do (/s-):
   /here/s-
   \<CR>
   xyiw
-
-After:
+Then:
   AssertEqual "ishereby", @"
+
 Do (/b-):
   /here/b-
   \<CR>
   xyiw
+Then:
+  AssertEqual "ishereby", @"
 
-After:
-  AssertEqual "i", @"
 Do (/s-2):
   /here/s-2
   \<CR>
   xbyiw
-
-After:
+Then:
   AssertEqual "i", @"
+
 Do (/b-2):
   /here/b-2
   \<CR>
   xbyiw
+Then:
+  AssertEqual "i", @"
 
 # Repeat
 # ==============================================================================
-
-After:
 
 Do (d/):
   d/limit\<CR>
@@ -312,88 +312,84 @@ Expect:
 
 ^ Very magic (deprecated)
 ^ ==============================================================================
-After:
-  AssertEqual [1, 1], [line('.'), col('.')]
 Do (/.):
   /.\<cr>
+Then:
+  AssertEqual [1, 1], [line('.'), col('.')]
 
-After:
-  AssertEqual [14, 63], [line('.'), col('.')]
 Do (/\V.):
   /\V.\<cr>
+Then:
+  AssertEqual [14, 63], [line('.'), col('.')]
 
-After:
 Execute (Set g:oblique#very_magic):
   let g:oblique#very_magic = 1
 
-After:
-  AssertEqual [14, 63], [line('.'), col('.')]
 Do (\V is automatically prepended to .):
   /.\<cr>
+Then:
+  AssertEqual [14, 63], [line('.'), col('.')]
 
-After:
-  AssertEqual [1, 1], [line('.'), col('.')]
 Do (Delete prepended \V):
   /\<c-u>.\<cr>
+Then:
+  AssertEqual [1, 1], [line('.'), col('.')]
 
-After:
 Execute (Unlet g:oblique#very_magic):
   unlet g:oblique#very_magic
 
 # Prefix
 # ==============================================================================
 
-After:
 Execute (Set g:oblique#very_magic):
   let g:oblique#prefix = '\V'
 
-After:
-  AssertEqual [14, 63], [line('.'), col('.')]
 Do (\V is automatically prepended to .):
   /.\<cr>
+Then:
+  AssertEqual [14, 63], [line('.'), col('.')]
 
-After:
-  AssertEqual [1, 1], [line('.'), col('.')]
-  unlet g:oblique#prefix
 Do (Delete prepended \V):
   /\<c-u>.\<cr>
+Then:
+  AssertEqual [1, 1], [line('.'), col('.')]
+  unlet g:oblique#prefix
 
 # Star-search
 # ==============================================================================
-After:
+Do (*-search):
+  jjw*
+Then:
   AssertEqual '\V\<License\>', histget('/', -1)
   AssertEqual [3, 5], [line('.'), col('.')]
   AssertEqual 1, &hlsearch
-Do (*-search):
-  jjw*
 
-After:
-  AssertEqual [3, 5], [line('.'), col('.')]
-  AssertEqual 1, &hlsearch
 Do (*-search and n: no more match):
   jjw*n
+Then:
+  AssertEqual [3, 5], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
 
-After:
+Do (*-search and move cursor to clear highlight):
+  jjw*l
+Then:
   AssertEqual [3, 6], [line('.'), col('.')]
   doautocmd CursorMoved
   AssertEqual 0, &hlsearch
-Do (*-search and move cursor to clear highlight):
-  jjw*l
 
-After:
-  AssertEqual '\Vlicense', histget('/', -1)
-  AssertEqual [9, 16], [line('.'), col('.')]
 Do (#-search in visual mode):
   9Gfl
   ve#
+Then:
+  AssertEqual '\Vlicense', histget('/', -1)
+  AssertEqual [9, 16], [line('.'), col('.')]
 
-After:
-  AssertEqual [3, 5], [line('.'), col('.')]
 Do (#-search in visual mode then n):
   9Gfl
   ve#n
+Then:
+  AssertEqual [3, 5], [line('.'), col('.')]
 
-After:
 Do (*-search around a paragraph in visual mode):
   5Gvap*
   dgn
@@ -416,69 +412,65 @@ Expect:
 
 # gStar-search
 # ==============================================================================
-After:
-  AssertEqual '\Vcopy', histget('/', -1)
-  AssertEqual [1, 1], [line('.'), col('.')]
-  AssertEqual 1, &hlsearch
 Do (g*-search):
   6G
   wg*N
-
-After:
+Then:
   AssertEqual '\Vcopy', histget('/', -1)
   AssertEqual [1, 1], [line('.'), col('.')]
   AssertEqual 1, &hlsearch
+
 Do (g#-search):
   6G
   wg#n
+Then:
+  AssertEqual '\Vcopy', histget('/', -1)
+  AssertEqual [1, 1], [line('.'), col('.')]
+  AssertEqual 1, &hlsearch
 
 # Fuzzy-search
 # ==============================================================================
 
-After:
-  AssertEqual [13, 11], [line('.'), col('.')]
-  AssertEqual 'Copyright (c) 2014 Junegunn C', @a
-  AssertEqual 'copy of this software and associated doc', @b
-  AssertEqual 'copyright notice and this permission notic', @c
 Do (z/ to fuzzy-search):
   z/ccc\<cr>
   gn"ay
   nnNgn"by
   ngn"cy
+Then:
+  AssertEqual [13, 11], [line('.'), col('.')]
+  AssertEqual 'Copyright (c) 2014 Junegunn C', @a
+  AssertEqual 'copy of this software and associated doc', @b
+  AssertEqual 'copyright notice and this permission notic', @c
 
-After:
-  AssertEqual [6, 3], [line('.'), col('.')]
-  AssertEqual 'CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN C', @a
-  AssertEqual 'copyright notice and this permission notic', @b
-  AssertEqual 'copy of this software and associated doc', @c
 Do (z? to backward-fuzzy-search):
   G
   z?ccc\<cr>
   gn"ay
   nnNgn"by
   ngn"cy
+Then:
+  AssertEqual [6, 3], [line('.'), col('.')]
+  AssertEqual 'CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN C', @a
+  AssertEqual 'copyright notice and this permission notic', @b
+  AssertEqual 'copy of this software and associated doc', @c
 
 # Regression
 # ==============================================================================
 
-After:
-  AssertEqual [1, 5], [line('.'), col('.')]
 Do (Invalid regular expression should not throw exception):
   /\?\<bs>\<bs>right\<cr>
+Then:
+  AssertEqual [1, 5], [line('.'), col('.')]
 
-After:
 Execute (n should not raise error when no match is found):
   execute "normal /xxxyyyzzz\<cr>n"
 
-After:
 Execute (N also should not raise error when no match is found):
   execute "normal /xxxyyyzzz\<cr>N"
 
-After:
 Execute (n should not raise error in visual mode when no match is found):
   execute "normal v/xxxyyyzzz\<cr>N"
 
-After:
 Given:
     \ { 'on': ['GHDashboard', 'GHActivity'] }
 Do (Star-search should not fail in the presence of backslashes):
@@ -530,9 +522,6 @@ Given:
   4. b
   5. a
 
-After:
-  AssertEqual -1, foldclosed('.')
-
 Do (Open fold on match (/)):
 * Fold line 2 & 3
   jzfj
@@ -540,6 +529,9 @@ Do (Open fold on match (/)):
   gg
 * / search to b
   /b\<cr>
+
+Then:
+  AssertEqual -1, foldclosed('.')
 
 Do (Open fold on match (* n)):
 * Fold line 2 & 3
@@ -549,7 +541,9 @@ Do (Open fold on match (* n)):
 * Search to the 2nd occurrence of a
   *n
 
-After:
+Then:
+  AssertEqual -1, foldclosed('.')
+
 # Error on '**'
 Given (Pattern with *s):
   a/*/b/**/c
@@ -820,8 +814,6 @@ Execute (#40 Escape / or ? when valid offset is not given):
 
 # Cleanup
 # ==============================================================================
-Before:
-After:
 Execute (Cleanup):
   set nohlsearch
   unlet match
