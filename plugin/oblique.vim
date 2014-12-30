@@ -338,7 +338,7 @@ function! s:highlight_current_match(...)
   let group = a:0 > 0 ? a:1 : 'ObliqueCurrentMatch'
   let pat = a:0 > 1 ? a:2 : @/
   let highlight_all = a:0 > 2 && a:3
-  silent! call s:matchadd(group, s:prefix_for(pat, highlight_all) . pat)
+  silent! call s:matchadd(group, s:prefix_for(pat, highlight_all) . '\&' . pat)
 endfunction
 
 if exists("*strdisplaywidth")
