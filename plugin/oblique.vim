@@ -132,6 +132,7 @@ endfunction
 
 function! s:finish()
   call s:revert_showcmd()
+  call s:clear()
   silent! call matchdelete(w:incsearch_id)
   silent! call matchdelete(w:current_incsearch_id)
   let last = s:strip_extra(@/)
