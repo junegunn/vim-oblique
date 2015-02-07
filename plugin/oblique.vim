@@ -172,26 +172,40 @@ function! s:finish_star(gv)
 
   let under = a:gv || getline('.')[col('.') - 1] =~ '\k' ||
                     \ getline('.')[col('.') :-1] !~ '\k'
-  if s:count > 1
-    execute 'normal! ' . (s:count - under) . 'n'
-  endif
-  let pos = winsaveview()
-  if under
-    normal! l
-    execute 'keepjumps normal!' (s:backward ? 'n' : 'N')
-  elseif s:count == 1
-    execute 'keepjumps normal!' (s:backward ? 'N' : 'n')
-  endif
-  call s:highlight_current_match()
-  call winrestview(pos)
-  call s:set_autocmd()
-  call s:echo_pattern('n')
-  if len(s:star_word) < s:optval('min_length')
-    call histdel('/', -1)
-  endif
-  if exists('#User#ObliqueStar')
-    doautocmd User ObliqueStar
-  endif
+  try
+    let ws = &wrapscan
+    if s:count > 1
+      execute 'normal! ' . (s:count - under) . 'n'
+    endif
+    if !ws
+      set wrapscan
+    endif
+    let pos = winsaveview()
+    if under
+      normal! l
+      execute 'keepjumps normal!' (s:backward ? 'n' : 'N')
+    elseif s:count == 1
+      execute 'keepjumps normal!' (s:backward ? 'N' : 'n')
+    endif
+    call s:highlight_current_match()
+    call winrestview(pos)
+    call s:set_autocmd()
+    call s:echo_pattern('n')
+    if len(s:star_word) < s:optval('min_length')
+      call histdel('/', -1)
+    endif
+    if exists('#User#ObliqueStar')
+      doautocmd User ObliqueStar
+    endif
+  catch
+    echohl ErrorMsg
+    echo substitute(v:exception, '.\{-}:', '', '')
+    echohl None
+  finally
+    if !ws
+      set nowrapscan
+    endif
+  endtry
 endfunction
 
 function! s:prefix_for(pat, highlight_all)
@@ -538,7 +552,7 @@ function! s:define_maps()
     for m in ['n', 'x']
       if !w && m == 'x' | continue | endif
       execute printf(m.'noremap <silent> <Plug>(Oblique-%s) :<C-U>let @/ = <SID>star_search(%d, %d, %d)<BAR>'
-        \ . 'if <SID>ok()<BAR>silent execute <SID>move(%d)<BAR>call <SID>finish_star(%d)<BAR>endif<CR>',
+        \ . 'if <SID>ok()<BAR>silent! execute <SID>move(%d)<BAR>call <SID>finish_star(%d)<BAR>endif<CR>',
         \ cmd, bw, w, m == 'x', bw, m == 'x')
     endfor
   endfor
