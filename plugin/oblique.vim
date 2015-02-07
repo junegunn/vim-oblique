@@ -458,10 +458,11 @@ function! s:oblique(gv, backward, fuzzy)
     endif
     return pat
   catch 'exit'
-    call winrestview(s:view)
     call pseudocl#render#clear()
     let s:fuzzy = was_fuzzy
     return @/
+  finally
+    call winrestview(s:view)
   endtry
 endfunction
 

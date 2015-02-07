@@ -73,6 +73,21 @@ Expect:
 
   DEALINGS IN THE SOFTWARE.
 
+Do (/ with command and nowrapscan):
+  :set nowrapscan\<cr>
+  5G
+  d/dealings\<cr>
+
+Expect:
+  Copyright (c) 2014 Junegunn Choi
+
+  MIT License
+
+  DEALINGS IN THE SOFTWARE.
+
+Then:
+  set wrapscan
+
 # CTRL-L
 # ==============================================================================
 

@@ -10,6 +10,8 @@ Execute (Setup):
   autocmd! User ObliqueRepeat
 
   syntax enable
+  silent! nunmap "
+  silent! xunmap "
 
   function! CurrentMatch(exists, msg)
     Assert a:exists ==
