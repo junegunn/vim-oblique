@@ -1,4 +1,4 @@
-" Copyright (c) 2014 Junegunn Choi
+" Copyright (c) 2015 Junegunn Choi
 "
 " MIT License
 "
@@ -233,7 +233,39 @@ function! s:matchadd(...)
   endif
 endfunction
 
-function! g:_oblique_on_change(new, old, cursor)
+nnoremap <Plug>(Oblique-o-/) /
+nnoremap <Plug>(Oblique-o-?) ?
+xnoremap <Plug>(Oblique-o-/) /
+xnoremap <Plug>(Oblique-o-?) ?
+cmap <Plug>(Oblique-cmd-/) <c-r>=oblique#_save_cmdline()<cr><c-c><Plug>(Oblique-/)<c-r>=oblique#_prev_cmdline()<cr>
+cmap <Plug>(Oblique-cmd-?) <c-r>=oblique#_save_cmdline()<cr><c-c><Plug>(Oblique-?)<c-r>=oblique#_prev_cmdline()<cr>
+
+function! oblique#_save_cmdline()
+  let s:prev_cmd = getcmdline()
+  return ''
+endfunction
+
+function! oblique#_prev_cmdline()
+  return s:prev_cmd
+endfunction
+
+function! oblique#_on_event(evt, new, cursor)
+  let [pat, _] = s:build_pattern(a:new, s:backward ? '?' : '/', s:fuzzy)
+  call feedkeys(
+        \ (s:backward ? "\<Plug>(Oblique-o-?)" : "\<Plug>(Oblique-o-/)") .
+        \ pat . "\<C-F>")
+  augroup ObliqueCmdwin
+    autocmd!
+    if s:backward
+      autocmd CmdwinLeave * execute 'autocmd! ObliqueCmdwin' | call feedkeys("\<Plug>(Oblique-cmd-?)")
+    else
+      autocmd CmdwinLeave * execute 'autocmd! ObliqueCmdwin' | call feedkeys("\<Plug>(Oblique-cmd-/)")
+    endif
+  augroup END
+  return [g:pseudocl#EXIT, a:new, a:cursor]
+endfunction
+
+function! oblique#_on_change(new, old, cursor)
   if getchar(1) != 0
     return
   endif
@@ -258,7 +290,7 @@ function! g:_oblique_on_change(new, old, cursor)
   endif
 endfunction
 
-function! g:_oblique_on_unknown_key(code, new, cursor)
+function! oblique#_on_unknown_key(code, new, cursor)
   if !empty(s:matching) && a:code == "\<C-L>"
     let [a,  b]  = [getreg('a'),     getreg('b')]
     let [at, bt] = [getregtype('a'), getregtype('b')]
@@ -442,13 +474,14 @@ function! s:oblique(gv, backward, fuzzy)
     \ 'prompt':    ['ObliquePrompt', (s:count > 1 ? s:count : '') . (s:fuzzy ? 'F' : '') . sym],
     \ 'input':     s:optval('prefix') . vmagic,
     \ 'history':   history,
+    \ 'on_event':  function('oblique#_on_event'),
     \ 'map':       s:optval('enable_cmap'),
     \ 'highlight': 'ObliqueLine'
     \ }
     if &incsearch
-      let opts.on_change = function('g:_oblique_on_change')
+      let opts.on_change = function('oblique#_on_change')
       if !a:fuzzy
-        let opts.on_unknown_key = function('g:_oblique_on_unknown_key')
+        let opts.on_unknown_key = function('oblique#_on_unknown_key')
       endif
     endif
 
