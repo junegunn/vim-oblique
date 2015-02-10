@@ -284,7 +284,7 @@ function! g:_oblique_on_unknown_key(code, new, cursor)
       let @/ = slash
     endtry
   endif
-  return [a:code, a:new, a:cursor]
+  return [g:pseudocl#CONTINUE, a:new, a:cursor]
 endfunction
 
 function! s:set_autocmd()
