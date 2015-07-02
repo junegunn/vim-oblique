@@ -597,8 +597,18 @@ function! s:define_maps()
     endif
   endfor
 
-  nnoremap gd gd:normal *<cr>
-  nnoremap gD gD:normal *<cr>
+  if empty(maparg('gd', 'n'))
+    nnoremap gd gd:normal *<cr>
+  endif
+  if empty(maparg('gD', 'n'))
+    nnoremap gD gD:normal *<cr>
+  endif
+  if empty(maparg('gd', 'x'))
+    xnoremap gd gd<esc>:normal *<cr>gv
+  endif
+  if empty(maparg('gD', 'x'))
+    xnoremap gD gD<esc>:normal *<cr>gv
+  endif
 
   nnoremap <silent> <Plug>(Oblique-Repeat) :call <SID>repeat()<CR>
 endfunction
