@@ -78,14 +78,9 @@ The following example will move your cursor line to the middle of the screen
 after search.
 
 ```vim
-" Clear autocommand
-autocmd! User Oblique
-autocmd! User ObliqueStar
-autocmd! User ObliqueRepeat
-
-autocmd User Oblique       normal! zz
-autocmd User ObliqueStar   normal! zz
-autocmd User ObliqueRepeat normal! zz
+autocmd! User Oblique       normal! zz
+autocmd! User ObliqueStar   normal! zz
+autocmd! User ObliqueRepeat normal! zz
 ```
 
 ### Highlighting

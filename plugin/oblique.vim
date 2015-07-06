@@ -150,7 +150,7 @@ function! s:finish()
       call histdel('/', -1)
     endif
     if exists('#User#Oblique')
-      doautocmd User Oblique
+      doautocmd <nomodeline> User Oblique
     endif
   else
     if len(last) >= mlen
@@ -195,7 +195,7 @@ function! s:finish_star(gv)
       call histdel('/', -1)
     endif
     if exists('#User#ObliqueStar')
-      doautocmd User ObliqueStar
+      doautocmd <nomodeline> User ObliqueStar
     endif
   catch
     echohl ErrorMsg
@@ -405,7 +405,7 @@ function! s:next(n, cnt, gv)
     call s:set_autocmd()
     call s:echo_pattern(a:n)
     if exists('#User#ObliqueRepeat')
-      doautocmd User ObliqueRepeat
+      doautocmd <nomodeline> User ObliqueRepeat
     endif
   catch
     let msg = substitute(v:exception, '.\{-}:', '', '')
