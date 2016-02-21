@@ -529,6 +529,10 @@ function! s:move(bw)
   return "normal! ". s:count . sym . s:term . off . "\<CR>" . (s:stay ? 'N' : '')
 endfunction
 
+function! s:direction(forward)
+  return a:forward ? (s:backward ? 'N' : 'n') : (s:backward ? 'n' : 'N')
+endfunction
+
 function! s:define_maps()
   silent! call pseudocl#nop()
   if !exists('*pseudocl#start')
@@ -588,11 +592,15 @@ function! s:define_maps()
   nnoremap <silent> <Plug>(Oblique-N) :<c-u>call <SID>next('N', v:count1, 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
   xnoremap <silent> <Plug>(Oblique-n) :<c-u>call <SID>next('n', v:count1, 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
   xnoremap <silent> <Plug>(Oblique-N) :<c-u>call <SID>next('N', v:count1, 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> <Plug>(Oblique-n!) :<c-u>call <SID>next(<SID>direction(1), v:count1, 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  nnoremap <silent> <Plug>(Oblique-N!) :<c-u>call <SID>next(<SID>direction(0), v:count1, 0)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  xnoremap <silent> <Plug>(Oblique-n!) :<c-u>call <SID>next(<SID>direction(1), v:count1, 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+  xnoremap <silent> <Plug>(Oblique-N!) :<c-u>call <SID>next(<SID>direction(0), v:count1, 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
   for m in ['n', 'x']
-    if !hasmapto('<Plug>(Oblique-n)', m)
+    if empty(maparg('n', m))
       execute m."map n <Plug>(Oblique-n)"
     endif
-    if !hasmapto('<Plug>(Oblique-N)', m)
+    if empty(maparg('N', m))
       execute m."map N <Plug>(Oblique-N)"
     endif
   endfor

@@ -28,7 +28,7 @@ Usage
 
 vim-oblique overrides the following keys by default:
 
-| Default Key | `<Plug>` map           | Description                                      |
+| Default Key | `<Plug>` map         | Description                                      |
 | ----------- | -------------------- | ------------------------------------------------ |
 | `/`         | `<Plug>(Oblique-/)`  | Forward search                                   |
 | `?`         | `<Plug>(Oblique-?)`  | Backward search                                  |
@@ -36,6 +36,8 @@ vim-oblique overrides the following keys by default:
 | `z?`        | `<Plug>(Oblique-F?)` | Backward fuzzy-search                            |
 | `n`         | `<Plug>(Oblique-n)`  | Repeat the last search                           |
 | `N`         | `<Plug>(Oblique-N)`  | Repeat the last search in the opposite direction |
+|             | `<Plug>(Oblique-n!)` | Repeat the last search (always forward)          |
+|             | `<Plug>(Oblique-N!)` | Repeat the last search (always backward)         |
 | `*`         | `<Plug>(Oblique-*)`  | Forward star-search (in normal and visual mode)  |
 | `#`         | `<Plug>(Oblique-#)`  | Backward star-search (in normal and visual mode) |
 | `g*`        | `<Plug>(Oblique-g*)` | Forward star-search (no word boundary match)     |
