@@ -630,6 +630,6 @@ call s:define_maps()
 let &cpo = s:cpo_save
 unlet s:cpo_save
 
-function Do_clear_highlight()
+function! Do_clear_highlight()
     call s:no_hl_clear()
 endfunction
