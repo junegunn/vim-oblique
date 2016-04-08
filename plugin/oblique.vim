@@ -341,12 +341,16 @@ endfunction
 
 function! s:on_cursor_moved(force)
   if a:force || !exists('b:_oblique_pos') || line('.') != b:_oblique_pos[0] || col('.') != b:_oblique_pos[1]
-    set nohlsearch " function-search-undo
-    call s:clear()
+    call s:no_hl_clear()
     return 1
   else
     return 0
   endif
+endfunction
+
+function! s:no_hl_clear()
+	set nohlsearch
+	call s:clear()
 endfunction
 
 function! s:highlight_current_match(...)
@@ -626,3 +630,6 @@ call s:define_maps()
 let &cpo = s:cpo_save
 unlet s:cpo_save
 
+function Do_clear_highlight()
+    call s:no_hl_clear()
+endfunction
