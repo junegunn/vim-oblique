@@ -328,10 +328,11 @@ function! s:on_win_enter()
 endfunction
 
 function! s:clear_autocmd()
-  execute 'augroup Oblique'.bufnr('%')
+  let grp = 'Oblique'.bufnr('%')
+  execute 'augroup' grp
     autocmd!
   augroup END
-  execute 'augroup! Oblique'.bufnr('%')
+  " execute 'augroup!' grp
 endfunction
 
 function! s:clear()
